@@ -9,6 +9,8 @@ set(
     SRC
 
     "src/rwr.c"
+    "src/sources.c"
+    "src/model/alr56.c"
 )
 
 find_package(SDL2 REQUIRED)
