@@ -7,10 +7,26 @@
 
 #define ALR56_MAX_CONTACTS (16)
 
+enum {
+    ALR56_HANDOFF_NORMAL,
+    ALR56_HANDOFF_DIAMOND_FLOAT,
+    ALR56_HANDOFF_TRANSIENT,
+    ALR56_HANDOFF_LATCH
+};
+
+typedef uint8_t alr56_handoff_mode_t;
+
+typedef struct alr56_priority_contact {
+    contact_t *contact;
+    tone_sequence_t *lock_tone;
+} alr56_priority_contact_t;
+
 /// Model for the ALR-56M RWR
 typedef struct alr56 {
     contact_t contacts[ALR56_MAX_CONTACTS];
     tone_player_t *tones;
+    alr56_handoff_mode_t handoff_mode;
+    alr56_priority_contact_t priority;
     float volume;
 } alr56_t;
 
@@ -30,3 +46,6 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer);
 
 /// Drop the given RWR contact, breaking lock if gained
 void alr56_drop(alr56_t *rwr, contact_t *contact);
+
+/// Free memory allocated for this model, does not free the tone player passed to the `alr56_new` function
+void alr56_free(alr56_t *rwr);

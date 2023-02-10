@@ -52,9 +52,11 @@ enum {
     TONE_SEQUENCE_LOOPFOR,
 };
 
+typedef uint8_t tone_sequence_end_flag_t;
+
 /// Behavior when a tone sequence reaches the final tone
 typedef struct tone_sequence_end {
-    uint8_t flag;
+    tone_sequence_end_flag_t flag;
     union {
         struct {
             uint8_t loops;

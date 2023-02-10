@@ -36,6 +36,7 @@ typedef uint8_t source_location_t;
 typedef struct source {
     const char *const name;
     source_location_t location;
+    float lethal_range;
     const source_radar_t radar;
 } source_t;
 
