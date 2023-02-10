@@ -55,18 +55,33 @@ enum {
 typedef struct tone_sequence {
     uint8_t tone_idx;
     uint8_t end_behavior;
-    struct tone_sequence *next;
     uint8_t tone_len;
-    tone_t tones[];
+    tone_t *tones;
+    struct tone_sequence *next;
 } tone_sequence_t;
 
-
+/// Audio player that mixes multiple `tone_sequence`s
 typedef struct tone_player {
-    uint64_t total_samples;
     tone_sequence_t *tones; 
 } tone_player_t;
+
+tone_player_t* tone_player_new();
+
+/// Add a new tone sequence to this tone player
+void tone_player_add(tone_player_t *player, tone_sequence_t *seq);
 
 /// Fill an audio buffer with the mixed tones
 void tone_player_fill_buf(tone_player_t *player, float *buf, int len);
 
-void tone_player_remove_sequence(tone_sequence_t *seq);
+void tone_player_remove_sequence(tone_player_t *player, tone_sequence_t *seq);
+
+void tone_player_free(tone_player_t *player);
+
+/// Create a new tone sequence from a series of tones and an end behavior
+tone_sequence_t* tone_sequence_new(tone_t *tones, uint8_t len, uint8_t end_behavior);
+
+#define TONE_SEQUENCE(end_behavior, ...) \
+    tone_sequence_new((__VA_ARGS__), sizeof(__VA_ARGS__), end_behavior)
+
+/// Free the given tone sequence's allocated memory
+void tone_sequence_free(tone_sequence_t *seq);

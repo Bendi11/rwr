@@ -17,7 +17,7 @@ find_package(SDL2 REQUIRED)
 
 add_library(rwr ${SRC})
 
-target_link_libraries(rwr ${SDL2_LIBRARIES})
+target_link_libraries(rwr ${SDL2_LIBRARIES} m)
 target_include_directories(rwr PUBLIC ${SDL2_INCLUDE_DIRECTORIES} "${CMAKE_SOURCE_DIR}/include")
 
 add_executable(rwrsim "src/main.c")

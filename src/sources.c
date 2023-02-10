@@ -7,3 +7,4 @@ source_t SOURCES[SOURCES_COUNT] = {
 };
 
 #undef SOURCE
+#undef SOURCE_PASTE
