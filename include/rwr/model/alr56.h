@@ -16,4 +16,12 @@ typedef struct alr56 {
 void alr56_new(alr56_t *rwr);
 
 /// Attempt to create a new RWR that has painted the aircraft with search radar
+///
+/// Returns NULL if the RWR has reached the maximum number of contacts
 contact_t *alr56_newguy(alr56_t *rwr, const source_t *source, location_t location);
+
+/// Upgrade the given contact to an STT lock
+void alr56_lock(alr56_t *rwr, contact_t *contact);
+
+/// Drop the given RWR contact, breaking lock if gained
+void alr56_drop(alr56_t *rwr, contact_t *contact);
