@@ -25,5 +25,8 @@ contact_t *alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
 /// Upgrade the given contact to an STT lock
 void alr56_lock(alr56_t *rwr, contact_t *contact);
 
+/// Launch a missile from the given target
+void alr56_missile(alr56_t *rwr, contact_t *contact);
+
 /// Drop the given RWR contact, breaking lock if gained
 void alr56_drop(alr56_t *rwr, contact_t *contact);

@@ -14,19 +14,6 @@ void test_cb(void *userdat, uint8_t *buf, int len) {
 tone_sequence_t *newguy_air_tone = NULL;
 
 int main(int argc, char *argv[]) {
-    if(newguy_air_tone == NULL) {
-        newguy_air_tone = TONE_SEQUENCE(
-            (tone_sequence_end_t){TONE_SEQUENCE_STOP},
-            (tone_t[]){
-                (tone_t){ .frequency = 3000, .amplitude = 10, .length = 0.025 },
-                (tone_t){ .amplitude = 0, .length = 0.025 },
-
-                (tone_t){ .frequency = 3000, .amplitude = 10, .length = 0.025 },
-                (tone_t){ .amplitude = 0, .length = 0.025 },
-            }
-        );
-    }
-
     if(SDL_Init(SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "Failed to initialize stderr: %s\n", SDL_GetError());
         return -1;
@@ -65,6 +52,8 @@ int main(int argc, char *argv[]) {
     
 
     tone_player_add(rwr->tones, newguy_air_tone);
+    SDL_Delay(1000);
+    alr56_missile(rwr, NULL);
     //tone_player_add(player, seq);
 
 
