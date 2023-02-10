@@ -8,31 +8,34 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
-    memset(buf, 0, sizeof(float) * len);
-
-    if(player->pause_timer > 0.f) {
-        int skipped_samples = (player->sample_ts * player->pause_timer);
-        skipped_samples = MIN(len, skipped_samples);
-        len -= skipped_samples;
-        player->pause_timer -= skipped_samples * player->sample_ts;
+float clamp(float v, float lim) {
+    if(v > lim) {
+        return lim;
+    } else if(v < -lim) {
+        return -lim;
+    } else {
+        return v;
     }
+}
 
-    tone_sequence_t *next = player->tones;
-    while(next != NULL) {
-        tone_t tone = next->tones[next->tone_idx];
-        size_t samplesRemaining = (tone.length - tone.progress) * player->sample_rate;
-        for(size_t i = 0; i < MIN((size_t)len, samplesRemaining); ++i) {
-            buf[i] = sin(2 * PI * tone.progress * tone.frequency) * tone.amplitude;
-            tone.progress += player->sample_ts;
-        }
+static size_t write_tone(tone_player_t *player, float *buf, tone_t *tone, int len) {
+    size_t samplesRemaining = (size_t)((tone->length - tone->progress) * player->sample_rate);
+    samplesRemaining = MIN((size_t)len, samplesRemaining);
+    for(size_t i = 0; i < samplesRemaining; i++) {
+        buf[i] += clamp(sin(2 * PI * tone->progress * tone->frequency) * 300, 1) * tone->amplitude;
+        tone->progress += player->sample_ts;
+    }
+    
+    return samplesRemaining;
+}
 
-
-        if(samplesRemaining <= (size_t)len) {
+static tone_sequence_t* write_seq(tone_player_t *player, tone_sequence_t *next, float *buf, int len) {
+    size_t samples = 0;
+    for(;;) {
+        samples += write_tone(player, buf + samples, &next->tones[next->tone_idx], len - samples);
+        if(samples < (size_t)len) {
             next->tones[next->tone_idx].progress = 0;
             next->tone_idx += 1;
-            tone = next->tones[next->tone_idx];
-            tone.progress = 0;
             if(next->tone_idx >= next->tone_len) {
                 switch(next->end_behavior.flag) {
                     case TONE_SEQUENCE_LOOP: {
@@ -43,7 +46,9 @@ void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
                     case TONE_SEQUENCE_STOP: {
                         tone_sequence_t *tmp = next;
                         next = next->next;
+                        samples = 0;
                         tone_player_remove_sequence(player, tmp);
+                        return next;
                     } break;
 
                     case TONE_SEQUENCE_LOOPFOR: {
@@ -59,9 +64,23 @@ void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
             continue;
         }
 
-        next->tones[next->tone_idx] = tone;
-        next = next->next;
+        return next->next;
     }
+}
+
+void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
+    memset(buf, 0, sizeof(float) * len);
+
+    if(player->pause_timer > 0.f) {
+        int skipped_samples = (player->sample_ts * player->pause_timer);
+        skipped_samples = MIN(len, skipped_samples);
+        len -= skipped_samples;
+        player->pause_timer -= skipped_samples * player->sample_ts;
+    }
+
+    tone_sequence_t *next = player->tones;
+
+    while(next != NULL) { next = write_seq(player, next, buf, len); }
 }
 
 tone_player_t* tone_player_new(float sample_rate) {

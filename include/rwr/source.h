@@ -41,5 +41,4 @@ typedef struct source {
 } source_t;
 
 
-
 extern source_t SOURCES[SOURCES_COUNT];

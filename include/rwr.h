@@ -78,7 +78,8 @@ typedef struct tone_player {
     float sample_rate;
     float sample_ts;
     float pause_timer;
-    tone_sequence_t *tones; 
+    tone_sequence_t *tones;
+    tone_sequence_t *priority;
 } tone_player_t;
 
 tone_player_t* tone_player_new(float sample_rate);

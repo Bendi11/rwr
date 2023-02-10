@@ -22,7 +22,7 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
     alr56_t *rwr = malloc(sizeof(*rwr));
     memset(rwr->contacts, 0, sizeof(rwr->contacts));
     rwr->tones = tone_player;
-    rwr->volume = 0.5;
+    rwr->volume = 0.05;
     rwr->handoff_mode = ALR56_HANDOFF_DIAMOND_FLOAT;
     rwr->priority = (alr56_priority_contact_t){
         .contact = NULL,
@@ -31,25 +31,22 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
     
     if(newguy_air_tone == NULL) {
         newguy_air_tone = TONE_SEQUENCE(
-            (tone_sequence_end_t){TONE_SEQUENCE_STOP},
+            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 8 }),
             (tone_t[]){
-                (tone_t){ .frequency = 3000, .amplitude = rwr->volume / 20, .length = 0.25 },
-                (tone_t){ .amplitude = 0, .length = 0.25 },
+                (tone_t){ .frequency = 3000, .amplitude = rwr->volume / 20, .length = 0.025 },
+                (tone_t){ .amplitude = 0, .length = 0.025 },
 
-                (tone_t){ .frequency = 3000, .amplitude = rwr->volume / 20, .length = 0.25 },
-                (tone_t){ .amplitude = 0, .length = 0.25 },
+                (tone_t){ .frequency = 3000, .amplitude = rwr->volume / 20, .length = 0.025 },
+                (tone_t){ .amplitude = 0, .length = 0.025 },
             }
         );
     }
 
     if(newguy_surface_tone == NULL) {
         newguy_surface_tone = TONE_SEQUENCE(
-            (tone_sequence_end_t){TONE_SEQUENCE_STOP},
+            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 8 }),
             (tone_t[]){
-                (tone_t){ .frequency = 500, .amplitude = rwr->volume, .length = 0.25 },
-                (tone_t){ .amplitude = 0, .length = 0.025 },
-
-                (tone_t){ .frequency = 500, .amplitude = rwr->volume, .length = 0.25 },
+                (tone_t){ .frequency = 500, .amplitude = rwr->volume, .length = 0.025 },
                 (tone_t){ .amplitude = 0, .length = 0.025 },
             }
         );

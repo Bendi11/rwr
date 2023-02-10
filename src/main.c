@@ -33,21 +33,21 @@ int main(int argc, char *argv[]) {
     
     alr56_t *rwr = alr56_new(player);
     contact_t *contact;
-    if((contact = alr56_newguy(rwr, &SOURCES[SOURCE_F16], (location_t){.bearing = 0, .distance = 10})) == NULL) {
+    if((contact = alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 0, .distance = 10})) == NULL) {
         fprintf(stderr, "FAIL");
     }
 
 
     SDL_PauseAudio(0);
-    SDL_Delay(1000);
+    SDL_Delay(2193);
 
     alr56_lock(rwr, contact);
 
-    SDL_Delay(2000);
+    SDL_Delay(4976);
 
     alr56_missile(rwr, contact, 10);
 
-    SDL_Delay(1000);
+    SDL_Delay(2819);
 
     SDL_CloseAudio();
     SDL_Quit();
