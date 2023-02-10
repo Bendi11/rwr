@@ -9,6 +9,15 @@ static tone_sequence_t *newguy_air_tone = NULL;
 static tone_sequence_t *newguy_surface_tone = NULL;
 static tone_sequence_t *missile_tone = NULL;
 
+
+static void alr56_diamond_float_assign(alr56_t *rwr);
+static void alr56_clear_priority(alr56_t *rwr);
+
+static void alr56_recompute_priority(alr56_t *rwr) {
+    alr56_clear_priority(rwr);
+    alr56_diamond_float_assign(rwr);
+}
+
 alr56_t* alr56_new(tone_player_t *tone_player) {
     alr56_t *rwr = malloc(sizeof(*rwr));
     memset(rwr->contacts, 0, sizeof(rwr->contacts));
@@ -83,6 +92,8 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
         } else {
             tone_player_add(rwr->tones, newguy_surface_tone);
         }
+
+        alr56_recompute_priority(rwr);
     }
 
     return contact;
@@ -118,13 +129,49 @@ static contact_t* alr56_find_priority(alr56_t *rwr) {
     return highest;
 }
 
+static tone_sequence_t* alr56_get_lock_tone(alr56_t *rwr, source_radar_t radar) {
+    return TONE_SEQUENCE(
+        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOP),
+        (tone_t[]){
+            (tone_t){ .frequency = radar.prf, .amplitude = rwr->volume, .length = radar.on_s },
+            (tone_t){ .frequency = 0, .amplitude = 0, .length = radar.off_s }
+        }
+    );
+}
+
+static void alr56_diamond_float_assign(alr56_t *rwr) {
+    contact_t *pri = alr56_find_priority(rwr);
+    if(pri != NULL) {
+        rwr->priority.contact = pri;
+        if(pri->status == CONTACT_LOCK) {
+            rwr->priority.lock_tone = alr56_get_lock_tone(rwr, pri->source->radar);
+            tone_player_add(rwr->tones, rwr->priority.lock_tone);
+        }
+    }
+}
+
+
+static void alr56_clear_priority(alr56_t *rwr) {
+    rwr->priority.contact = NULL;
+    if(rwr->priority.lock_tone != NULL) {
+        tone_player_remove_sequence(rwr->tones, rwr->priority.lock_tone);
+        rwr->priority.lock_tone = NULL;
+    }
+}
+
 void alr56_drop(alr56_t *rwr, contact_t *contact) {
-    if(rwr->priority.contact == contact) { rwr->priority = NULL; }
+    if(rwr->priority.contact == contact) {
+        alr56_recompute_priority(rwr); 
+    }
+
+    contact->source = NULL;
 }
 
 void alr56_lock(alr56_t *rwr, contact_t *contact) {
     if(contact->status == CONTACT_LOCK) { return; }
-    
+   
+    contact->status = CONTACT_LOCK;
+    alr56_recompute_priority(rwr);
 }
 
 void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
@@ -132,10 +179,13 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
         alr56_lock(rwr, contact);
     }
 
-    fired_missile_t missile = {
+    fired_missile_t *missile = malloc(sizeof(*missile));
+    *missile = (fired_missile_t){
         .location = contact->location,
         .next = NULL
     };
+
+    
 
     tone_player_add(rwr->tones, missile_tone);
 }

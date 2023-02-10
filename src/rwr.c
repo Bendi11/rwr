@@ -126,3 +126,18 @@ void tone_player_free(tone_player_t *player) {
 
     free(player);
 }
+
+void contact_add_missile(contact_t *contact, fired_missile_t missile) {
+    if(contact->status != CONTACT_LOCK) { return; }
+
+    fired_missile_t *next = contact->lock.missile;
+    if(next == NULL) {
+        *contact->lock.missile = missile;
+    }
+
+    while(next->next != NULL) {
+        next = next->next;
+    }
+
+    *next->next = missile;
+}

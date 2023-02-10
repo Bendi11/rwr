@@ -103,3 +103,5 @@ tone_sequence_t* tone_sequence_new(tone_t *tones, uint8_t len, tone_sequence_end
 
 /// Free the given tone sequence's allocated memory
 void tone_sequence_free(tone_sequence_t *seq);
+
+void contact_add_missile(contact_t *contact, fired_missile_t missile);
