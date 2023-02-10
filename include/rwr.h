@@ -62,6 +62,7 @@ typedef struct tone_sequence {
 
 /// Audio player that mixes multiple `tone_sequence`s
 typedef struct tone_player {
+    float v;
     tone_sequence_t *tones; 
 } tone_player_t;
 
@@ -81,7 +82,7 @@ void tone_player_free(tone_player_t *player);
 tone_sequence_t* tone_sequence_new(tone_t *tones, uint8_t len, uint8_t end_behavior);
 
 #define TONE_SEQUENCE(end_behavior, ...) \
-    tone_sequence_new((__VA_ARGS__), sizeof(__VA_ARGS__), end_behavior)
+    tone_sequence_new((__VA_ARGS__), sizeof(__VA_ARGS__) / sizeof((__VA_ARGS__)[0]), end_behavior)
 
 /// Free the given tone sequence's allocated memory
 void tone_sequence_free(tone_sequence_t *seq);

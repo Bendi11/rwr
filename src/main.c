@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
     tone_sequence_t *seq = TONE_SEQUENCE(
         TONE_SEQUENCE_LOOP,
         (tone_t[]){
-            (tone_t){.frequency = 1000, .amplitude = 200, .length = 200 },
-            (tone_t){.frequency = 500, .amplitude = 500, .length = 2 }
+            (tone_t){.frequency = 856, .amplitude = 10, .length = 0.1, .progress = 0 },
+            (tone_t){.frequency = 0, .amplitude = 0, .length =  0.1, .progress = 0 }
         }
     );
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     SDL_OpenAudio(&spec, NULL);
     SDL_PauseAudio(0);
 
-    SDL_Delay(5000);
+    SDL_Delay(3000);
 
     SDL_CloseAudio();
     SDL_Quit();

@@ -3,32 +3,41 @@
 #include <math.h>
 #include <string.h>
 
+#define PI (3.14159)
+
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
     memset(buf, 0, sizeof(float) * len);
 
     tone_sequence_t *next = player->tones;
 o:  while(next != NULL) {
         tone_t tone = next->tones[next->tone_idx];
-        for(int i = 0; i < len; ++i) {
-            if(tone.progress >= tone.length) {
-                next->tones[next->tone_idx].progress = 0;
-                next->tone_idx += 1;
-                if(next->tone_idx >= next->tone_len) {
-                    if(next->end_behavior == TONE_SEQUENCE_LOOP) {
-                        next->tone_idx = 0;
-                    } else {
-                        tone_sequence_t *tmp = next;
-                        next = next->next;
-                        tone_player_remove_sequence(player, tmp);
-                        goto o;
-                    }
-                }
-            }
-
-            buf[i] = sin(tone.progress * tone.frequency) * tone.amplitude;
-            tone.progress += 1.0f / 44100.0f;
+        size_t samplesRemaining = ((tone.length - tone.progress) * (float)44100);
+        for(size_t i = 0; i < MIN((size_t)len, samplesRemaining); ++i) {
+            buf[i] = sin(2 * PI * tone.progress * tone.frequency) * tone.amplitude;
+            tone.progress += 1 / (float)44100;
         }
 
+
+        if(samplesRemaining <= (size_t)len) {
+            next->tones[next->tone_idx].progress = 0;
+            next->tone_idx += 1;
+            tone = next->tones[next->tone_idx];
+            tone.progress = 0;
+            if(next->tone_idx >= next->tone_len) {
+                if(next->end_behavior == TONE_SEQUENCE_LOOP) {
+                    next->tone_idx = 0;
+                } else {
+                    tone_sequence_t *tmp = next;
+                    next = next->next;
+                    tone_player_remove_sequence(player, tmp);
+                }
+            }
+            continue;
+        }
+
+        next->tones[next->tone_idx] = tone;
         next = next->next;
     }
 }
