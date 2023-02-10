@@ -37,3 +37,36 @@ typedef struct contact {
         } lock;
     };
 } contact_t;
+
+/// A single sine wave played for a period of time
+typedef struct tone {
+    float amplitude;
+    float frequency;
+    float length;
+    float progress;
+} tone_t;
+
+enum {
+    TONE_SEQUENCE_LOOP,
+    TONE_SEQUENCE_STOP
+};
+
+/// A sequence of tones that can loop or end
+typedef struct tone_sequence {
+    uint8_t tone_idx;
+    uint8_t end_behavior;
+    struct tone_sequence *next;
+    uint8_t tone_len;
+    tone_t tones[];
+} tone_sequence_t;
+
+
+typedef struct tone_player {
+    uint64_t total_samples;
+    tone_sequence_t *tones; 
+} tone_player_t;
+
+/// Fill an audio buffer with the mixed tones
+void tone_player_fill_buf(tone_player_t *player, float *buf, int len);
+
+void tone_player_remove_sequence(tone_sequence_t *seq);

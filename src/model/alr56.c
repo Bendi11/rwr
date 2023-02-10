@@ -3,6 +3,13 @@
 
 #include <SDL2/SDL.h>
 
+static tone_player_t tones;
+
+
+static void tone_callback(void *userdata, uint8_t *stream, int len) {
+
+}
+
 void alr56_new(alr56_t *rwr) {
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         rwr->contacts[i].source = NULL;
