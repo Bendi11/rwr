@@ -8,7 +8,7 @@
 static tone_sequence_t *newguy_air_tone = NULL;
 static tone_sequence_t *newguy_surface_tone = NULL;
 static tone_sequence_t *missile_tone = NULL;
-
+static tone_sequence_t *silence = NULL;
 
 static void alr56_diamond_float_assign(alr56_t *rwr);
 static void alr56_clear_priority(alr56_t *rwr);
@@ -62,6 +62,13 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
         );
     }
 
+    if(silence == NULL) {
+        silence = TONE_SEQUENCE(
+            TONE_SEQUENCE_END(TONE_SEQUENCE_STOP),
+            (tone_t[]){ (tone_t){ .amplitude = 0, .length = 0.4 } }
+        );
+    }
+
 
     return rwr;
 }
@@ -85,9 +92,11 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
 
     if(contact != NULL) {
         if(contact->source->location == RADAR_SOURCE_AIR) {
-            tone_player_add(rwr->tones, newguy_air_tone);
+            tone_player_add_pri(rwr->tones, newguy_air_tone);
+            tone_player_add_pri(rwr->tones, silence);
         } else {
-            tone_player_add(rwr->tones, newguy_surface_tone);
+            tone_player_add_pri(rwr->tones, newguy_surface_tone);
+            tone_player_add_pri(rwr->tones, silence);
         }
 
         alr56_recompute_priority(rwr);
@@ -184,7 +193,7 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
 
     
 
-    tone_player_add(rwr->tones, missile_tone);
+    tone_player_add_pri(rwr->tones, missile_tone);
 }
 
 void alr56_free(alr56_t *rwr) {

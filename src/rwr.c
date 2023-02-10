@@ -34,7 +34,7 @@ typedef struct tone_write_tuple {
     size_t written_samples;
 } tone_write_tuple_t;
 
-static tone_write_tuple_t write_seq(tone_player_t *player, tone_sequence_t *next, float *buf, int len) {
+static tone_write_tuple_t write_seq(tone_player_t *player, tone_sequence_t *next, float *buf, int len, bool priority) {
     size_t samples = 0;
     for(;;) {
         samples += write_tone(player, buf + samples, &next->tones[next->tone_idx], len - samples);
@@ -51,9 +51,13 @@ static tone_write_tuple_t write_seq(tone_player_t *player, tone_sequence_t *next
                     case TONE_SEQUENCE_STOP: {
                         tone_sequence_t *tmp = next;
                         next = next->next;
-                        samples = 0;
-                        tone_player_remove_sequence(player, tmp);
-                        return (tone_write_tuple_t){ .next = next->next, .written_samples = samples };
+                        if(priority) {
+                            tone_player_remove_pri(player, tmp);
+                        } else {
+                            tone_player_remove_sequence(player, tmp);
+                        }
+                        
+                        return (tone_write_tuple_t){ .next = next, .written_samples = samples };
                     } break;
 
                     case TONE_SEQUENCE_LOOPFOR: {
@@ -78,7 +82,7 @@ void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
     
     tone_sequence_t *next = player->priority;
     while(next != NULL && len > 0) {
-        tone_write_tuple_t ret = write_seq(player, next, buf, len);
+        tone_write_tuple_t ret = write_seq(player, next, buf, len, true);
         next = ret.next;
         len -= ret.written_samples;
         buf += ret.written_samples;
@@ -87,12 +91,13 @@ void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
 
     next = player->tones;
 
-    while(next != NULL) { next = write_seq(player, next, buf, len).next; }
+    while(next != NULL) { next = write_seq(player, next, buf, len, false).next; }
 }
 
 tone_player_t* tone_player_new(float sample_rate) {
     tone_player_t *player = malloc(sizeof(*player));
     player->tones = NULL;
+    player->priority = NULL;
     player->sample_rate = sample_rate;
     player->sample_ts = 1.0f / player->sample_rate;
     return player;
