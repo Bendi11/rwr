@@ -77,7 +77,6 @@ typedef struct tone_sequence {
 typedef struct tone_player {
     float sample_rate;
     float sample_ts;
-    float pause_timer;
     tone_sequence_t *tones;
     tone_sequence_t *priority;
 } tone_player_t;
@@ -86,6 +85,11 @@ tone_player_t* tone_player_new(float sample_rate);
 
 /// Add a new tone sequence to this tone player
 void tone_player_add(tone_player_t *player, tone_sequence_t *seq);
+
+/// Add a sound to play while muting other tones
+void tone_player_add_pri(tone_player_t *player, tone_sequence_t *seq);
+
+void tone_player_remove_pri(tone_player_t *player, tone_sequence_t *seq);
 
 /// Fill an audio buffer with the mixed tones
 void tone_player_fill_buf(tone_player_t *player, float *buf, int len);

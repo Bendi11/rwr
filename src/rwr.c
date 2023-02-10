@@ -29,7 +29,12 @@ static size_t write_tone(tone_player_t *player, float *buf, tone_t *tone, int le
     return samplesRemaining;
 }
 
-static tone_sequence_t* write_seq(tone_player_t *player, tone_sequence_t *next, float *buf, int len) {
+typedef struct tone_write_tuple {
+    tone_sequence_t *next;
+    size_t written_samples;
+} tone_write_tuple_t;
+
+static tone_write_tuple_t write_seq(tone_player_t *player, tone_sequence_t *next, float *buf, int len) {
     size_t samples = 0;
     for(;;) {
         samples += write_tone(player, buf + samples, &next->tones[next->tone_idx], len - samples);
@@ -48,7 +53,7 @@ static tone_sequence_t* write_seq(tone_player_t *player, tone_sequence_t *next, 
                         next = next->next;
                         samples = 0;
                         tone_player_remove_sequence(player, tmp);
-                        return next;
+                        return (tone_write_tuple_t){ .next = next->next, .written_samples = samples };
                     } break;
 
                     case TONE_SEQUENCE_LOOPFOR: {
@@ -64,23 +69,25 @@ static tone_sequence_t* write_seq(tone_player_t *player, tone_sequence_t *next, 
             continue;
         }
 
-        return next->next;
+        return (tone_write_tuple_t){ .next = next->next, .written_samples = samples };
     }
 }
 
 void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
     memset(buf, 0, sizeof(float) * len);
-
-    if(player->pause_timer > 0.f) {
-        int skipped_samples = (player->sample_ts * player->pause_timer);
-        skipped_samples = MIN(len, skipped_samples);
-        len -= skipped_samples;
-        player->pause_timer -= skipped_samples * player->sample_ts;
+    
+    tone_sequence_t *next = player->priority;
+    while(next != NULL && len > 0) {
+        tone_write_tuple_t ret = write_seq(player, next, buf, len);
+        next = ret.next;
+        len -= ret.written_samples;
+        buf += ret.written_samples;
+        if(len == 0) { return; }
     }
 
-    tone_sequence_t *next = player->tones;
+    next = player->tones;
 
-    while(next != NULL) { next = write_seq(player, next, buf, len); }
+    while(next != NULL) { next = write_seq(player, next, buf, len).next; }
 }
 
 tone_player_t* tone_player_new(float sample_rate) {
@@ -91,21 +98,21 @@ tone_player_t* tone_player_new(float sample_rate) {
     return player;
 }
 
-void tone_player_add(tone_player_t *player, tone_sequence_t *seq) {
-    if(player->tones == NULL) {
-        player->tones = seq;
+static void tones_list_add(tone_sequence_t **tones, tone_sequence_t *seq) {
+    if(*tones == NULL) {
+        *tones = seq;
         return;
     }
 
-    tone_sequence_t *node = player->tones;
+    tone_sequence_t *node = *tones;
     while(node->next != NULL) { node = node->next; }
     node->next = seq;
 }
 
-void tone_player_remove_sequence(tone_player_t *player, tone_sequence_t *seq) {
-    tone_sequence_t *next = player->tones;
+static void tones_list_remove(tone_sequence_t **tones, tone_sequence_t *seq) {
+    tone_sequence_t *next = *tones;
     if(next == seq) {
-        player->tones = next->next;
+        *tones = next->next;
         tone_sequence_free(next);
     }
 
@@ -118,6 +125,12 @@ void tone_player_remove_sequence(tone_player_t *player, tone_sequence_t *seq) {
         next = next->next;
     }
 }
+
+void tone_player_add(tone_player_t *player, tone_sequence_t *seq) { tones_list_add(&player->tones, seq); }
+void tone_player_add_pri(tone_player_t *player, tone_sequence_t *seq) { tones_list_add(&player->priority, seq); }
+
+void tone_player_remove_sequence(tone_player_t *player, tone_sequence_t *seq) { tones_list_remove(&player->tones, seq); }
+void tone_player_remove_pri(tone_player_t *player, tone_sequence_t *seq) { tones_list_remove(&player->priority, seq); }
 
 void tone_sequence_free(tone_sequence_t *seq) {
     free(seq->tones);
