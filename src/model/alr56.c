@@ -1,5 +1,6 @@
 #include "rwr/model/alr56.h"
 #include "rwr.h"
+#include "rwr/source.h"
 
 #include <SDL2/SDL.h>
 #include <malloc.h>
@@ -72,16 +73,25 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
     }
 
     if(contact != NULL) {
-        tone_player_add(rwr->tones, newguy_air_tone);
+        if(contact->source->location == RADAR_SOURCE_AIR) {
+            tone_player_add(rwr->tones, newguy_air_tone);
+        } else {
+            tone_player_add(rwr->tones, newguy_surface_tone);
+        }
     }
 
     return contact;
 }
 
 void alr56_lock(alr56_t *rwr, contact_t *contact) {
-    
+     
 }
 
-void alr56_missile(alr56_t *rwr, contact_t *contact) {
+void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
+    fired_missile_t missile = {
+        .location = contact->location,
+        .next = NULL
+    };
+
     tone_player_add(rwr->tones, missile_tone);
 }
