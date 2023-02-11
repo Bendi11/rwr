@@ -15,6 +15,7 @@ typedef struct location {
 /// A missile fired by a radar contact with an active lock
 typedef struct fired_missile {
     location_t location;
+    SDL_TimerID associated_timer;
     struct fired_missile *next;
 } fired_missile_t;
 
@@ -110,3 +111,5 @@ tone_sequence_t* tone_sequence_new(tone_t *tones, uint8_t len, tone_sequence_end
 void tone_sequence_free(tone_sequence_t *seq);
 
 void contact_add_missile(contact_t *contact, fired_missile_t missile);
+
+void contact_free(contact_t contact);

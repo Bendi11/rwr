@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define SOURCE_PASTE
 #define SOURCE(sym, ...) SOURCE_##sym,
 
 enum {
@@ -13,7 +12,6 @@ enum {
 };
 
 #undef SOURCE
-#undef SOURCE_PASTE
 
 /// Audio profile for a source radar
 typedef struct source_radar {

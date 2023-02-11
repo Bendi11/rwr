@@ -14,7 +14,7 @@ void test_cb(void *userdat, uint8_t *buf, int len) {
 
 int main(int argc, char *argv[]) {
     if(SDL_Init(SDL_INIT_AUDIO) < 0) {
-        fprintf(stderr, "Failed to initialize stderr: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return -1;
     }
 
