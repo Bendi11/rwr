@@ -43,11 +43,19 @@ int main(int argc, char *argv[]) {
 
     alr56_lock(rwr, contact);
 
-    SDL_Delay(4976);
+    SDL_Delay(3976);
+
+    contact_t *nc = alr56_newguy(rwr, &SOURCES[SOURCE_F16], (location_t){0});
+
+    SDL_Delay(3470);
 
     alr56_missile(rwr, contact, 10);
 
-    SDL_Delay(2819);
+    SDL_Delay(3819);
+
+    alr56_lock(rwr, nc);
+
+    SDL_Delay(2000);
 
     SDL_CloseAudio();
     SDL_Quit();

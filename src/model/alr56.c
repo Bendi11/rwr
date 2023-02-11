@@ -5,17 +5,63 @@
 #include <SDL2/SDL.h>
 #include <malloc.h>
 
-static tone_sequence_t *newguy_air_tone = NULL;
-static tone_sequence_t *newguy_surface_tone = NULL;
-static tone_sequence_t *missile_tone = NULL;
-static tone_sequence_t *silence = NULL;
+#define ALR56_MAX_AIR_PRF (3000)
+#define ALR56_MAX_GROUND_PRF (500)
 
-static void alr56_diamond_float_assign(alr56_t *rwr);
 static void alr56_clear_priority(alr56_t *rwr);
+static contact_t* alr56_find_priority(alr56_t *rwr);
+static tone_sequence_t* alr56_get_lock_tone(alr56_t *rwr, const source_t *const source);
 
 static void alr56_recompute_priority(alr56_t *rwr) {
-    alr56_clear_priority(rwr);
-    alr56_diamond_float_assign(rwr);
+    contact_t *pri = alr56_find_priority(rwr);
+    if(pri != NULL) {
+        if(pri != rwr->priority.contact) {
+            alr56_clear_priority(rwr);
+            rwr->priority.contact = pri;
+        }
+
+        if(pri->status == CONTACT_LOCK && rwr->priority.lock_tone == NULL) {
+            rwr->priority.lock_tone = alr56_get_lock_tone(rwr, pri->source);
+            tone_player_add(rwr->tones, rwr->priority.lock_tone);
+        }
+    }
+}
+
+static tone_sequence_t* newguy_air_tone(float volume) {
+    return TONE_SEQUENCE(
+        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 8 }),
+        (tone_t[]){
+            (tone_t){ .frequency = 3000, .amplitude = volume, .length = 0.025 },
+            (tone_t){ .amplitude = 0, .length = 0.025 },
+        }
+    );
+}
+
+static tone_sequence_t* newguy_surface_tone(float volume) {
+    return TONE_SEQUENCE(
+        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 8 }),
+        (tone_t[]){
+            (tone_t){ .frequency = 500, .amplitude = volume, .length = 0.025 },
+            (tone_t){ .amplitude = 0, .length = 0.025 },
+        }
+    );
+}
+
+static tone_sequence_t* missile_tone(float volume) {
+    return TONE_SEQUENCE(
+        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 10 }),
+        (tone_t[]){
+            (tone_t){ .frequency = 1000, .amplitude = volume, .length = 0.1 },
+            (tone_t){ .amplitude = 0, .length = 0.1 }
+        }
+    );
+}
+
+static tone_sequence_t* silence_tone(void) {
+    return TONE_SEQUENCE(
+        TONE_SEQUENCE_END(TONE_SEQUENCE_STOP),
+        (tone_t[]){ (tone_t){ .amplitude = 0, .length = 0.4 } }
+    );
 }
 
 alr56_t* alr56_new(tone_player_t *tone_player) {
@@ -28,47 +74,6 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
         .contact = NULL,
         .lock_tone = NULL
     };
-    
-    if(newguy_air_tone == NULL) {
-        newguy_air_tone = TONE_SEQUENCE(
-            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 8 }),
-            (tone_t[]){
-                (tone_t){ .frequency = 3000, .amplitude = rwr->volume / 20, .length = 0.025 },
-                (tone_t){ .amplitude = 0, .length = 0.025 },
-
-                (tone_t){ .frequency = 3000, .amplitude = rwr->volume / 20, .length = 0.025 },
-                (tone_t){ .amplitude = 0, .length = 0.025 },
-            }
-        );
-    }
-
-    if(newguy_surface_tone == NULL) {
-        newguy_surface_tone = TONE_SEQUENCE(
-            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 8 }),
-            (tone_t[]){
-                (tone_t){ .frequency = 500, .amplitude = rwr->volume, .length = 0.025 },
-                (tone_t){ .amplitude = 0, .length = 0.025 },
-            }
-        );
-    }
-
-    if(missile_tone == NULL) {
-        missile_tone = TONE_SEQUENCE(
-            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 10 }),
-            (tone_t[]){
-                (tone_t){ .frequency = 1000, .amplitude = rwr->volume, .length = 0.1 },
-                (tone_t){ .amplitude = 0, .length = 0.1 }
-            }
-        );
-    }
-
-    if(silence == NULL) {
-        silence = TONE_SEQUENCE(
-            TONE_SEQUENCE_END(TONE_SEQUENCE_STOP),
-            (tone_t[]){ (tone_t){ .amplitude = 0, .length = 0.4 } }
-        );
-    }
-
 
     return rwr;
 }
@@ -92,11 +97,15 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
 
     if(contact != NULL) {
         if(contact->source->location == RADAR_SOURCE_AIR) {
-            tone_player_add_pri(rwr->tones, newguy_air_tone);
-            tone_player_add_pri(rwr->tones, silence);
+            tone_player_add_pri(rwr->tones, newguy_air_tone(rwr->volume));
+            tone_player_add_pri(rwr->tones, silence_tone());
+            tone_player_add_pri(rwr->tones, newguy_air_tone(rwr->volume));
+            tone_player_add_pri(rwr->tones, silence_tone());
         } else {
-            tone_player_add_pri(rwr->tones, newguy_surface_tone);
-            tone_player_add_pri(rwr->tones, silence);
+            tone_player_add_pri(rwr->tones, newguy_surface_tone(rwr->volume));
+            tone_player_add_pri(rwr->tones, silence_tone());
+            tone_player_add_pri(rwr->tones, newguy_surface_tone(rwr->volume));
+            tone_player_add_pri(rwr->tones, silence_tone());
         }
 
         alr56_recompute_priority(rwr);
@@ -135,27 +144,34 @@ static contact_t* alr56_find_priority(alr56_t *rwr) {
     return highest;
 }
 
-static tone_sequence_t* alr56_get_lock_tone(alr56_t *rwr, source_radar_t radar) {
-    return TONE_SEQUENCE(
-        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOP),
-        (tone_t[]){
-            (tone_t){ .frequency = radar.prf, .amplitude = rwr->volume, .length = radar.on_s },
-            (tone_t){ .frequency = 0, .amplitude = 0, .length = radar.off_s }
-        }
-    );
-}
-
-static void alr56_diamond_float_assign(alr56_t *rwr) {
-    contact_t *pri = alr56_find_priority(rwr);
-    if(pri != NULL) {
-        rwr->priority.contact = pri;
-        if(pri->status == CONTACT_LOCK) {
-            rwr->priority.lock_tone = alr56_get_lock_tone(rwr, pri->source->radar);
-            tone_player_add(rwr->tones, rwr->priority.lock_tone);
-        }
+static tone_sequence_t* alr56_get_lock_tone(alr56_t *rwr, const source_t *const source) {
+    source_radar_t radar = source->radar;
+    if(source->location == RADAR_SOURCE_AIR && radar.prf > ALR56_MAX_AIR_PRF) {
+        return TONE_SEQUENCE(
+            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOP),
+            (tone_t[]){
+                (tone_t){ .frequency = ALR56_MAX_AIR_PRF, .amplitude = rwr->volume, .length = 0.075 },
+                (tone_t){ .amplitude = 0, .length = 1.411 }
+            }
+        );
+    } else if(source->location == RADAR_SOURCE_SURFACE && radar.prf > ALR56_MAX_GROUND_PRF) {
+        return TONE_SEQUENCE(
+            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOP),
+            (tone_t[]){
+                (tone_t){ .frequency = ALR56_MAX_GROUND_PRF, .amplitude = rwr->volume, .length = 0.048 },
+                (tone_t){ .amplitude = 0, .length = 0.752 }
+            }
+        );
+    } else {
+        return TONE_SEQUENCE(
+            TONE_SEQUENCE_END(TONE_SEQUENCE_LOOP),
+            (tone_t[]){
+                (tone_t){ .frequency = radar.prf, .amplitude = rwr->volume, .length = radar.on_s },
+                (tone_t){ .frequency = 0, .amplitude = 0, .length = radar.off_s }
+            }
+        );
     }
 }
-
 
 static void alr56_clear_priority(alr56_t *rwr) {
     rwr->priority.contact = NULL;
@@ -193,7 +209,7 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
 
     
 
-    tone_player_add_pri(rwr->tones, missile_tone);
+    tone_player_add_pri(rwr->tones, missile_tone(rwr->volume));
 }
 
 void alr56_free(alr56_t *rwr) {
