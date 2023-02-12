@@ -7,6 +7,10 @@
 
 
 #define ALR56_MAX_CONTACTS (16)
+/// Airborne radar signals' audio will be capped to 3000hz
+#define ALR56_MAX_AIR_PRF (3000)
+/// Surface radar signals' audio will be capped to 500hz
+#define ALR56_MAX_GROUND_PRF (500)
 
 enum {
     ALR56_HANDOFF_NORMAL,

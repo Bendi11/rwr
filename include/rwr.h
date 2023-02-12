@@ -15,7 +15,6 @@ typedef struct location {
 /// A missile fired by a radar contact with an active lock
 typedef struct fired_missile {
     location_t location;
-    SDL_TimerID associated_timer;
     struct fired_missile *next;
 } fired_missile_t;
 
