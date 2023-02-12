@@ -11,7 +11,8 @@ set(
     "src/rwr.c"
     "src/sources.c"
     "src/tones.c"
-    "src/model/alr56.c"
+    "src/model/alr56/alr56.c"
+    "src/model/alr56/tones.c"
 )
 
 find_package(SDL2 REQUIRED)

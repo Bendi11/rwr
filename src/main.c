@@ -1,6 +1,7 @@
 
 #include "rwr.h"
 #include "rwr/model/alr56.h"
+#include "rwr/tones.h"
 #include <SDL2/SDL.h>
 #include <SDL_audio.h>
 #include <SDL_timer.h>
@@ -19,6 +20,7 @@ int main(int argc, char *argv[]) {
     }
 
     tone_player_t *player = tone_player_new(44100);
+    tone_player_set_volume(player, 0.05);
 
     SDL_AudioSpec spec;
     SDL_zero(spec);

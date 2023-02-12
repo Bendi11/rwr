@@ -19,8 +19,11 @@ enum {
     ALR56_HANDOFF_LATCH
 };
 
+/// Handoff mode, determines how the priority diamond will be assigned
 typedef uint8_t alr56_handoff_mode_t;
 
+/// An RWR priority contact containing a pointer to the currently playing lock tone for the 
+/// contact
 typedef struct alr56_priority_contact {
     contact_t *contact;
     tone_sequence_t *lock_tone;
@@ -32,11 +35,13 @@ typedef struct alr56 {
     tone_player_t *tones;
     alr56_handoff_mode_t handoff_mode;
     alr56_priority_contact_t priority;
-    float volume;
 } alr56_t;
 
 /// Create a new ALR56 RWR model with no contacts
 alr56_t* alr56_new(tone_player_t *player);
+
+/// Update periodic state of the RWR 
+void alr56_update(alr56_t *rwr, float timestep);
 
 /// Attempt to create a new RWR that has painted the aircraft with search radar
 ///

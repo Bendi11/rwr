@@ -7,7 +7,7 @@
 #include <malloc.h>
 
 
-static void alr56_recompute_priority(alr56_t *rwr) {
+void alr56_recompute_priority(alr56_t *rwr) {
     contact_t *pri = alr56_find_priority(rwr);
     if(pri != NULL) {
         if(pri != rwr->priority.contact) {
@@ -26,7 +26,6 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
     alr56_t *rwr = malloc(sizeof(*rwr));
     memset(rwr->contacts, 0, sizeof(rwr->contacts));
     rwr->tones = tone_player;
-    rwr->volume = 0.05;
     rwr->handoff_mode = ALR56_HANDOFF_DIAMOND_FLOAT;
     rwr->priority = (alr56_priority_contact_t){
         .contact = NULL,
@@ -55,15 +54,15 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
 
     if(contact != NULL) {
         if(contact->source->location == RADAR_SOURCE_AIR) {
-            tone_player_add_pri(rwr->tones, newguy_air_tone(rwr->volume));
-            tone_player_add_pri(rwr->tones, silence_tone());
-            tone_player_add_pri(rwr->tones, newguy_air_tone(rwr->volume));
-            tone_player_add_pri(rwr->tones, silence_tone());
+            tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+            tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
         } else {
-            tone_player_add_pri(rwr->tones, newguy_surface_tone(rwr->volume));
-            tone_player_add_pri(rwr->tones, silence_tone());
-            tone_player_add_pri(rwr->tones, newguy_surface_tone(rwr->volume));
-            tone_player_add_pri(rwr->tones, silence_tone());
+            tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+            tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
         }
 
         alr56_recompute_priority(rwr);
@@ -102,31 +101,30 @@ contact_t* alr56_find_priority(alr56_t *rwr) {
     return highest;
 }
 
-
-
 void alr56_clear_priority(alr56_t *rwr) {
     rwr->priority.contact = NULL;
     if(rwr->priority.lock_tone != NULL) {
-        tone_player_remove_sequence(rwr->tones, rwr->priority.lock_tone);
+        tone_player_remove(rwr->tones, rwr->priority.lock_tone);
         rwr->priority.lock_tone = NULL;
     }
 }
 
 void alr56_drop(alr56_t *rwr, contact_t *contact) {
+    contact_delete(*contact);
+    contact->source = NULL;
+
     if(rwr->priority.contact == contact) {
         alr56_recompute_priority(rwr); 
     }
-
-    contact_delete(*contact);
-
-    contact->source = NULL;
 }
 
 void alr56_lock(alr56_t *rwr, contact_t *contact) {
     if(contact->status == CONTACT_LOCK) { return; }
    
     contact->status = CONTACT_LOCK;
-    alr56_recompute_priority(rwr);
+    if(rwr->handoff_mode == ALR56_HANDOFF_DIAMOND_FLOAT) {
+        alr56_recompute_priority(rwr);
+    }
 }
 
 void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
@@ -134,13 +132,11 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
         alr56_lock(rwr, contact);
     }
 
-    fired_missile_t *missile = malloc(sizeof(*missile));
-    *missile = (fired_missile_t){
-        .location = contact->location,
-        .next = NULL
-    };
+    fired_missile_t missile = fired_missile_new(contact->location);
 
-    tone_player_add_pri(rwr->tones, missile_tone(rwr->volume));
+    contact_add_missile(contact, missile);
+
+    tone_player_add_pri(rwr->tones, alr56_missile_tone());
 }
 
 void alr56_free(alr56_t *rwr) {

@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <malloc.h>
+#include <string.h>
 #include <math.h>
 
 #define PI (3.14159)
@@ -56,7 +58,7 @@ static tone_write_tuple_t write_seq(tone_player_t *player, tone_sequence_t *next
                         if(priority) {
                             tone_player_remove_pri(player, tmp);
                         } else {
-                            tone_player_remove_sequence(player, tmp);
+                            tone_player_remove(player, tmp);
                         }
                         
                         return (tone_write_tuple_t){ .next = next, .written_samples = samples };
@@ -105,6 +107,8 @@ tone_player_t* tone_player_new(float sample_rate) {
     return player;
 }
 
+void tone_player_set_volume(tone_player_t *tones, float volume) { tones->volume = volume; }
+
 static void tones_list_add(tone_sequence_t **tones, tone_sequence_t *seq) {
     if(*tones == NULL) {
         *tones = seq;
@@ -136,7 +140,7 @@ static void tones_list_remove(tone_sequence_t **tones, tone_sequence_t *seq) {
 void tone_player_add(tone_player_t *player, tone_sequence_t *seq) { tones_list_add(&player->tones, seq); }
 void tone_player_add_pri(tone_player_t *player, tone_sequence_t *seq) { tones_list_add(&player->priority, seq); }
 
-void tone_player_remove_sequence(tone_player_t *player, tone_sequence_t *seq) { tones_list_remove(&player->tones, seq); }
+void tone_player_remove(tone_player_t *player, tone_sequence_t *seq) { tones_list_remove(&player->tones, seq); }
 void tone_player_remove_pri(tone_player_t *player, tone_sequence_t *seq) { tones_list_remove(&player->priority, seq); }
 
 void tone_sequence_free(tone_sequence_t *seq) {

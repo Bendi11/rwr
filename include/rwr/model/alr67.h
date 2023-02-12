@@ -3,6 +3,7 @@
 #include "rwr.h"
 #include "rwr/source.h"
 #include <stddef.h>
+#include "rwr/tones.h"
 
 
 #define ALR67_MAX_CONTACTS (16)

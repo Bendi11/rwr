@@ -15,6 +15,7 @@ typedef struct location {
 /// A missile fired by a radar contact with an active lock
 typedef struct fired_missile {
     location_t location;
+    float fired_time;
     struct fired_missile *next;
 } fired_missile_t;
 
@@ -33,12 +34,15 @@ typedef struct contact {
         /// Additional state for an RWR contact that has an STT lock on the aircraft
         struct contact_lock {
             /// A pointer to a linked list node of missiles fired that are guided by this radar
-            fired_missile_t *missile; 
+            fired_missile_t *missiles; 
         } lock;
     };
 } contact_t;
 
+/// Create a new missile with the given launch location
+fired_missile_t fired_missile_new(location_t loc);
 
+/// Add a fired missile to the linked list of missiles fired by the given locked contact
 void contact_add_missile(contact_t *contact, fired_missile_t missile);
 
 /// Free any memory allocated for the given contact
