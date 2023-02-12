@@ -21,11 +21,18 @@ typedef struct fired_missile {
     struct fired_missile *next;
 } fired_missile_t;
 
+enum {
+    CONTACT_SEARCH,
+    CONTACT_LOCK
+};
+
+typedef uint8_t contact_status_t;
+
 /// An RWR contact including radar emitter and location data
 typedef struct contact {
     const source_t *source;
     location_t location;
-    enum { CONTACT_SEARCH, CONTACT_LOCK } status;
+    contact_status_t status;
     union {
         /// Additional state for an RWR contact that has painted the aircraft with a search radar
         struct contact_search {
@@ -40,6 +47,9 @@ typedef struct contact {
         } lock;
     };
 } contact_t;
+
+/// Initialize the given contact with default values
+void contact_new(contact_t *contact, const source_t *source, location_t loc, contact_status_t status);
 
 /// Create a new missile with the given launch location
 fired_missile_t fired_missile_new(location_t loc);

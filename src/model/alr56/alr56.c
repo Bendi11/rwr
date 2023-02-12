@@ -57,14 +57,7 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         if(rwr->contacts[i].source == NULL) {
             contact = &rwr->contacts[i];
-            *contact = (contact_t){
-                .location = location,
-                .status = CONTACT_SEARCH,
-                .search = {
-                    .last_ping = SDL_GetTicks64(),
-                },
-                .source = source
-            };
+            contact_new(contact, source, location, CONTACT_SEARCH);
             break;
         }
     }
@@ -147,6 +140,7 @@ void alr56_lock(alr56_t *rwr, contact_t *contact) {
     if(contact->status == CONTACT_LOCK) { return; }
    
     contact->status = CONTACT_LOCK;
+    contact->lock.missiles = NULL;
     if(rwr->twp.handoff_mode == ALR56_HANDOFF_DIAMOND_FLOAT) {
         alr56_recompute_priority(rwr);
     }

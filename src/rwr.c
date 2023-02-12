@@ -4,21 +4,32 @@
 #include <math.h>
 #include <string.h>
 
+void contact_new(contact_t *contact, const source_t *source, location_t loc, contact_status_t status) {
+    *contact = (contact_t){
+        .location = loc,
+        .status = status,
+        .search = {
+            .last_ping = SDL_GetTicks64(),
+        },
+        .source = source
+    };
+}
 
-
-void contact_add_missile(contact_t *contact, fired_missile_t missile) {
+void contact_add_missile(contact_t *contact, fired_missile_t copy) {
     if(contact->status != CONTACT_LOCK) { return; }
+    fired_missile_t *missile = malloc(sizeof(*missile));
+    memcpy(missile, &copy, sizeof(copy));
+    missile->next = NULL;
 
     fired_missile_t *next = contact->lock.missiles;
     if(next == NULL) {
-        *contact->lock.missiles = missile;
+        contact->lock.missiles = missile;
+        return;
     }
 
-    while(next->next != NULL) {
-        next = next->next;
-    }
+    while(next->next != NULL) { next = next->next; }
 
-    *next->next = missile;
+    next->next = missile;
 }
 
 void contact_delete(contact_t contact) {
