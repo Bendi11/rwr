@@ -15,7 +15,7 @@ void alr56_recompute_priority(alr56_t *rwr) {
             rwr->priority.contact = pri;
         }
 
-        if(pri->status == CONTACT_LOCK && rwr->priority.lock_tone == NULL && rwr->handoff_mode != ALR56_HANDOFF_NORMAL) {
+        if(pri->status == CONTACT_LOCK && rwr->priority.lock_tone == NULL && rwr->twp.handoff_mode != ALR56_HANDOFF_NORMAL) {
             rwr->priority.lock_tone = alr56_get_lock_tone(rwr, pri->source);
             tone_player_add(rwr->tones, rwr->priority.lock_tone);
         }
@@ -26,7 +26,24 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
     alr56_t *rwr = malloc(sizeof(*rwr));
     memset(rwr->contacts, 0, sizeof(rwr->contacts));
     rwr->tones = tone_player;
-    rwr->handoff_mode = ALR56_HANDOFF_DIAMOND_FLOAT;
+    rwr->twp = (alr56_twp_t){
+        .handoff_mode = ALR56_HANDOFF_DIAMOND_FLOAT,
+        .missile_launch = (alr56_blink_common_t){
+            .blinks_remaining = 0,
+        },
+        .priority = false,
+        .unknown = {
+            .blink = (alr56_blink_common_t){ .blinks_remaining = 0 },
+            .state = ALR56_TWP_UNKNOWN_OFF
+        },
+        .target_sep = false
+    };
+    rwr->twa = (alr56_twa_t){
+        .dim = 1,
+        .low_altitude_pri = false,
+        .power = true,
+        .search = true
+    };
     rwr->priority = (alr56_priority_contact_t){
         .contact = NULL,
         .lock_tone = NULL
@@ -122,7 +139,7 @@ void alr56_lock(alr56_t *rwr, contact_t *contact) {
     if(contact->status == CONTACT_LOCK) { return; }
    
     contact->status = CONTACT_LOCK;
-    if(rwr->handoff_mode == ALR56_HANDOFF_DIAMOND_FLOAT) {
+    if(rwr->twp.handoff_mode == ALR56_HANDOFF_DIAMOND_FLOAT) {
         alr56_recompute_priority(rwr);
     }
 }

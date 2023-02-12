@@ -29,11 +29,50 @@ typedef struct alr56_priority_contact {
     tone_sequence_t *lock_tone;
 } alr56_priority_contact_t;
 
+/// Common state for a blinking light
+typedef struct alr56_blink_common {
+    bool light;
+    uint8_t blinks_remaining;
+    float period_left;
+} alr56_blink_common_t;
+
+enum {
+    ALR56_TWP_UNKNOWN_SHIP,
+    ALR56_TWP_UNKNOWN_ON,
+    ALR56_TWP_UNKNOWN_OFF,
+};
+
+typedef uint8_t alr56_twp_unknown_state_t;
+
+/// State modelling the Theat Warning Panel found next to the RWR display
+typedef struct alr56_twp {
+    alr56_handoff_mode_t handoff_mode;
+    alr56_blink_common_t missile_launch;
+    struct {
+        alr56_blink_common_t blink;
+        alr56_twp_unknown_state_t state;
+    } unknown;
+
+    bool target_sep;
+
+    /// Display only five high priority contacts instead of 12 or 16
+    bool priority;
+} alr56_twp_t;
+
+/// State modelling the TWA panel controlling more functionality of the RWR
+typedef struct alr56_twa {
+    float dim;
+    bool search;
+    bool low_altitude_pri;
+    bool power;
+} alr56_twa_t;
+
 /// Model for the ALR-56M RWR
 typedef struct alr56 {
     contact_t contacts[ALR56_MAX_CONTACTS];
     tone_player_t *tones;
-    alr56_handoff_mode_t handoff_mode;
+    alr56_twp_t twp;
+    alr56_twa_t twa;
     alr56_priority_contact_t priority;
 } alr56_t;
 
