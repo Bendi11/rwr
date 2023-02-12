@@ -26,7 +26,7 @@ static size_t write_tone(tone_player_t *player, float *buf, tone_t *tone, int le
     size_t samplesRemaining = (size_t)((tone->length - tone->progress) * player->sample_rate);
     samplesRemaining = MIN((size_t)len, samplesRemaining);
     for(size_t i = 0; i < samplesRemaining; i++) {
-        buf[i] += clamp(sin(2 * PI * tone->progress * tone->frequency) * 300, 1) * tone->amplitude;
+        buf[i] += clamp(sin(2 * PI * tone->progress * tone->frequency) * 300, 1) * (tone->amplitude * player->volume);
         tone->progress += player->sample_ts;
     }
     
