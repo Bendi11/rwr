@@ -20,7 +20,7 @@ static void alr56_recompute_priority(alr56_t *rwr) {
             rwr->priority.contact = pri;
         }
 
-        if(pri->status == CONTACT_LOCK && rwr->priority.lock_tone == NULL) {
+        if(pri->status == CONTACT_LOCK && rwr->priority.lock_tone == NULL && rwr->handoff_mode != ALR56_HANDOFF_NORMAL) {
             rwr->priority.lock_tone = alr56_get_lock_tone(rwr, pri->source);
             tone_player_add(rwr->tones, rwr->priority.lock_tone);
         }
@@ -185,6 +185,8 @@ void alr56_drop(alr56_t *rwr, contact_t *contact) {
     if(rwr->priority.contact == contact) {
         alr56_recompute_priority(rwr); 
     }
+
+    contact_delete(*contact);
 
     contact->source = NULL;
 }
