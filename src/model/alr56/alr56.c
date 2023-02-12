@@ -6,7 +6,6 @@
 #include <SDL2/SDL.h>
 #include <malloc.h>
 
-
 void alr56_recompute_priority(alr56_t *rwr) {
     contact_t *pri = alr56_find_priority(rwr);
     if(pri != NULL) {

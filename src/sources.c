@@ -1,9 +1,11 @@
 #include "rwr/source.h"
+#include <icons.h>
 
-#define SOURCE(sym, string, loc, lethal, ...) [SOURCE_##sym] = (source_t){ \
+#define SOURCE(sym, string, loc, icon, lethal, ...) [SOURCE_##sym] = (source_t){ \
     .name = string,                                                        \
     .location = loc,                                                       \
-    .lethal_range = lethal,                                                 \
+    .icon_svg = icon,                                                      \
+    .lethal_range = lethal,                                                \
     .radar = __VA_ARGS__                                                   \
 },
 
