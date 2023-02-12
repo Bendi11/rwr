@@ -10,6 +10,7 @@ set(
 
     "src/rwr.c"
     "src/sources.c"
+    "src/tones.c"
     "src/model/alr56.c"
 )
 

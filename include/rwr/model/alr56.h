@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rwr.h"
+#include "rwr/tones.h"
 #include "rwr/source.h"
 #include <stddef.h>
 
