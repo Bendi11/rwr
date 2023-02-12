@@ -10,7 +10,7 @@ tone_sequence_t* alr56_get_lock_tone(alr56_t *rwr, const source_t *const source)
                 (tone_t){ .amplitude = 0, .length = 1.411 }
             }
         );
-    } else if(source->location == RADAR_SOURCE_SURFACE && radar.prf > ALR56_MAX_GROUND_PRF) {
+    } else if(source->location != RADAR_SOURCE_AIR && radar.prf > ALR56_MAX_GROUND_PRF) {
         return TONE_SEQUENCE(
             TONE_SEQUENCE_END(TONE_SEQUENCE_LOOP),
             (tone_t[]){

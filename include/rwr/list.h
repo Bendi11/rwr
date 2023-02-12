@@ -13,7 +13,7 @@ SOURCE(
 SOURCE(
     SA10,
     "SA-10",
-    RADAR_SOURCE_SURFACE,
+    RADAR_SOURCE_SURFACE_HIGH_ALT,
     25.0f,
     {
         .prf = 856,

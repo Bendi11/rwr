@@ -10,6 +10,8 @@ typedef struct location {
     float bearing;
     /// Distance from aircraft to the signal source
     float distance;
+    /// Altitude of the source radar in feet
+    float altitude;
 } location_t;
 
 /// A missile fired by a radar contact with an active lock

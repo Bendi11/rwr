@@ -88,15 +88,23 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
     return contact;
 }
 
-uint16_t alr56_get_threat(const contact_t *source) {
+uint16_t alr56_get_threat(alr56_t *rwr, const contact_t *source) {
     uint16_t threat = 0;
     if(source->location.distance <= source->source->lethal_range) {
         threat += (uint16_t)(
-            (source->source->lethal_range - source->location.distance) *
-            (source->status == CONTACT_LOCK ? 100 : 10)
+            (source->source->lethal_range - source->location.distance) * 20 +
+            (source->status == CONTACT_LOCK ? 100 : 0)
         );
     } else if(source->status == CONTACT_LOCK) {
         threat += 50;
+    }
+
+    if(source->source->location != RADAR_SOURCE_AIR) {
+        if(rwr->twa.low_altitude_pri && source->source->location == RADAR_SOURCE_SURFACE_LOW_ALT) {
+            threat += 100;
+        } else if(!rwr->twa.low_altitude_pri && source->source->location == RADAR_SOURCE_SURFACE_HIGH_ALT) {
+            threat += 100;
+        }
     }
 
     return threat;
@@ -107,7 +115,7 @@ contact_t* alr56_find_priority(alr56_t *rwr) {
     uint16_t threat = 0;
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         if(rwr->contacts[i].source != NULL) {
-            uint16_t contact_threat = alr56_get_threat(&rwr->contacts[i]);
+            uint16_t contact_threat = alr56_get_threat(rwr, &rwr->contacts[i]);
             if(contact_threat >= threat) {
                 highest = &rwr->contacts[i];
                 threat = contact_threat;
@@ -150,8 +158,11 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
     }
 
     fired_missile_t missile = fired_missile_new(contact->location);
-
     contact_add_missile(contact, missile);
+
+    rwr->twp.missile_launch.blinks_remaining = 8;
+    rwr->twp.missile_launch.light = true;
+    rwr->twp.missile_launch.period_left = 0.25f;
 
     tone_player_add_pri(rwr->tones, alr56_missile_tone());
 }

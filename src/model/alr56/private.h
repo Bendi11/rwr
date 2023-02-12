@@ -11,7 +11,7 @@ contact_t* alr56_find_priority(alr56_t *rwr);
 tone_sequence_t* alr56_get_lock_tone(alr56_t *rwr, const source_t *const source);
 
 /// Get a number representing the threat posed by a radar contact, weighing distance and current lock status
-uint16_t alr56_get_threat(const contact_t *source);
+uint16_t alr56_get_threat(alr56_t *rwr, const contact_t *source);
 
 /// Remove the currently prioritized contact and recalculate the priority contact for floating diamond handoff mode
 ///

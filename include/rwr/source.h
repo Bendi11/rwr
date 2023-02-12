@@ -24,7 +24,10 @@ typedef struct source_radar {
 } source_radar_t;
 
 enum {
-    RADAR_SOURCE_SURFACE,
+    /// SAM site most lethal to high altitude targets
+    RADAR_SOURCE_SURFACE_HIGH_ALT,
+    /// SAM site most lethal to low altitude targets
+    RADAR_SOURCE_SURFACE_LOW_ALT,
     RADAR_SOURCE_AIR,
 };
 
