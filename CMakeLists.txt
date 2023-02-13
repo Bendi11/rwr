@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 project(
     RWR
@@ -42,11 +43,12 @@ create_resources("${CMAKE_SOURCE_DIR}/asset/icon" "${CMAKE_BINARY_DIR}/generated
 create_resources("${CMAKE_SOURCE_DIR}/asset/panel" "${CMAKE_BINARY_DIR}/generated/panels.h")
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 
 add_library(rwr ${SRC})
 
-target_link_libraries(rwr ${SDL2_LIBRARIES} m)
-target_include_directories(rwr PUBLIC ${SDL2_INCLUDE_DIRECTORIES} "${CMAKE_SOURCE_DIR}/include" "${CMAKE_BINARY_DIR}/generated")
+target_link_libraries(rwr ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} m)
+target_include_directories(rwr PUBLIC ${SDL2_INCLUDE_DIRECTORIES} ${SDL2_IMAGE_INCLUDE_DIRS} "${CMAKE_SOURCE_DIR}/include" "${CMAKE_BINARY_DIR}/generated")
 
 add_executable(rwrsim "src/main.c")
 target_link_libraries(rwrsim rwr)
