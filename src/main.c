@@ -51,17 +51,15 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     bool run = true;
     while(run) {
-        while(SDL_PollEvent(&event) == 1) {
+        while(SDL_WaitEvent(&event) == 1) {
+            SDL_RenderClear(render);
+            alr56_render_scope(rwr, render);
+            SDL_RenderPresent(render);
             if(event.type == SDL_QUIT) {
                 run = false;
+                break;
             }
         }
-
-        SDL_RenderClear(render);
-        
-        alr56_render_scope(rwr, render);
-        SDL_RenderPresent(render);
-        SDL_Delay(30);
     }
 
     /*SDL_PauseAudio(0);
