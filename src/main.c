@@ -1,10 +1,14 @@
 
 #include "rwr.h"
 #include "rwr/model/alr56.h"
+#include "rwr/model/alr56/render.h"
 #include "rwr/tones.h"
 #include <SDL2/SDL.h>
 #include <SDL_audio.h>
+#include <SDL_render.h>
 #include <SDL_timer.h>
+#include <SDL_ttf.h>
+#include <SDL_video.h>
 
 void test_cb(void *userdat, uint8_t *buf, int len) {
     tone_player_t *player = userdat;
@@ -14,10 +18,12 @@ void test_cb(void *userdat, uint8_t *buf, int len) {
 }
 
 int main(int argc, char *argv[]) {
-    if(SDL_Init(SDL_INIT_AUDIO) < 0) {
+    if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return -1;
     }
+
+    TTF_Init();
 
     tone_player_t *player = tone_player_new(44100);
     tone_player_set_volume(player, 0.05);
@@ -32,15 +38,33 @@ int main(int argc, char *argv[]) {
     spec.userdata = player;
 
     SDL_OpenAudio(&spec, NULL);
-    
+
     alr56_t *rwr = alr56_new(player);
     contact_t *contact;
-    if((contact = alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 0, .distance = 10})) == NULL) {
-        fprintf(stderr, "FAIL");
+    contact = alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 45 * 3.14195f / 180.f, .distance = 25});
+
+
+    SDL_Window *window = NULL;
+    SDL_Renderer *render = NULL;
+    SDL_CreateWindowAndRenderer(400, 400, 0, &window, &render);
+    SDL_SetWindowTitle(window, "RWR");
+    SDL_Event event;
+    bool run = true;
+    while(run) {
+        while(SDL_PollEvent(&event) == 1) {
+            if(event.type == SDL_QUIT) {
+                run = false;
+            }
+        }
+
+        SDL_RenderClear(render);
+        
+        alr56_render_scope(rwr, render);
+        SDL_RenderPresent(render);
+        SDL_Delay(30);
     }
 
-
-    SDL_PauseAudio(0);
+    /*SDL_PauseAudio(0);
     SDL_Delay(2193);
 
     alr56_lock(rwr, contact);
@@ -57,8 +81,9 @@ int main(int argc, char *argv[]) {
 
     alr56_lock(rwr, nc);
 
-    SDL_Delay(2000);
-
+    SDL_Delay(2000);*/
+    
+    SDL_DestroyWindow(window);
     SDL_CloseAudio();
     SDL_Quit();
 

@@ -36,6 +36,7 @@ typedef uint8_t source_location_t;
 /// A single radar emitter containing constant characteristics of the radar
 typedef struct source {
     const char *const name;
+    uint16_t id;
     source_location_t location;
     const char *const icon_svg;
     float lethal_range;

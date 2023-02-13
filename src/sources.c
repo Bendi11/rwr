@@ -3,6 +3,7 @@
 
 #define SOURCE(sym, string, loc, icon, lethal, ...) [SOURCE_##sym] = (source_t){ \
     .name = string,                                                        \
+    .id = SOURCE_##sym,                                                    \
     .location = loc,                                                       \
     .icon_svg = icon,                                                      \
     .lethal_range = lethal,                                                \
