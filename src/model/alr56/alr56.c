@@ -61,7 +61,9 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
         }
     }
 
+
     if(contact != NULL) {
+        rwr->latest = contact;
         if(contact->source->location == RADAR_SOURCE_AIR) {
             tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
             tone_player_add_pri(rwr->tones, alr56_silence_tone());
@@ -132,6 +134,10 @@ void alr56_drop(alr56_t *rwr, contact_t *contact) {
 
     if(rwr->priority.contact == contact) {
         alr56_recompute_priority(rwr); 
+    }
+
+    if(rwr->latest == contact) {
+        rwr->latest = NULL;
     }
 }
 

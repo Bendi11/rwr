@@ -74,6 +74,7 @@ typedef struct alr56 {
     alr56_twp_t twp;
     alr56_twa_t twa;
     alr56_priority_contact_t priority;
+    contact_t *latest;
 } alr56_t;
 
 /// Create a new ALR56 RWR model with no contacts

@@ -6,6 +6,7 @@
 #include "icons.h"
 
 
+#include <SDL_pixels.h>
 #include <SDL_render.h>
 #include <SDL_rwops.h>
 #include <SDL_image.h>
@@ -70,6 +71,7 @@ void alr56_render_scope(alr56_t *rwr, SDL_Renderer *render) {
 
             dest.x = (int)x;
             dest.y = (int)y;
+
             SDL_RenderCopy(render, icons[contact->source->id], NULL, &dest);
         }
     }
