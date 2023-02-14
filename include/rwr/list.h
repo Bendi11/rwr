@@ -1,8 +1,8 @@
 SOURCE(
     F16,
     "F-16",
+    "16",
     RADAR_SOURCE_AIR,
-    F16_svg,
     7.0f,
     {
         .prf = 1200,
@@ -14,8 +14,8 @@ SOURCE(
 SOURCE(
     SA10,
     "SA-10",
+    "S",
     RADAR_SOURCE_SURFACE_HIGH_ALT,
-    BB_svg,
     25.0f,
     {
         .prf = 856,

@@ -41,12 +41,13 @@ int main(int argc, char *argv[]) {
 
     alr56_t *rwr = alr56_new(player);
     contact_t *contact;
-    contact = alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 45 * 3.14195f / 180.f, .distance = 25});
+    contact = alr56_newguy(rwr, &SOURCES[SOURCE_F16], (location_t){.bearing = 45 * 3.14195f / 180.f, .distance = 25});
+    alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 195 * 3.14195f / 180.f, .distance = 37});
 
 
     SDL_Window *window = NULL;
     SDL_Renderer *render = NULL;
-    SDL_CreateWindowAndRenderer(400, 400, 0, &window, &render);
+    SDL_CreateWindowAndRenderer(600, 600, 0, &window, &render);
     SDL_SetWindowTitle(window, "RWR");
     SDL_Event event;
     bool run = true;
