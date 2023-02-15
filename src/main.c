@@ -18,7 +18,7 @@ void test_cb(void *userdat, uint8_t *buf, int len) {
 }
 
 int main(int argc, char *argv[]) {
-    if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0) {
+    if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return -1;
     }

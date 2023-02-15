@@ -15,8 +15,8 @@ void contact_new(contact_t *contact, const source_t *source, location_t loc, con
     };
 }
 
-void contact_add_missile(contact_t *contact, fired_missile_t copy) {
-    if(contact->status != CONTACT_LOCK) { return; }
+fired_missile_t* contact_add_missile(contact_t *contact, fired_missile_t copy) {
+    if(contact->status != CONTACT_LOCK) { return NULL; }
     fired_missile_t *missile = malloc(sizeof(*missile));
     memcpy(missile, &copy, sizeof(copy));
     missile->next = NULL;
@@ -24,12 +24,13 @@ void contact_add_missile(contact_t *contact, fired_missile_t copy) {
     fired_missile_t *next = contact->lock.missiles;
     if(next == NULL) {
         contact->lock.missiles = missile;
-        return;
+        return missile;
     }
 
     while(next->next != NULL) { next = next->next; }
 
     next->next = missile;
+    return missile;
 }
 
 void contact_delete(contact_t contact) {
@@ -43,12 +44,34 @@ void fired_missile_free(fired_missile_t *msl) {
         fired_missile_free(msl->next);
     }
 
+    if(msl->timer != 0) {
+        SDL_RemoveTimer(msl->timer);
+    }
+
     free(msl);
+}
+
+void contact_remove_missile(contact_t *contact, fired_missile_t *missile) {
+    if(contact->status != CONTACT_LOCK) { return; }
+    fired_missile_t *msl = contact->lock.missiles;
+    if(msl == missile) {
+        contact->lock.missiles = missile->next;
+    } else {
+        while(msl != NULL && msl->next != missile) {
+            msl = msl->next;
+        }
+
+        if(msl == NULL) { return; }
+        msl->next = missile->next;
+    }
+
+    missile->next = NULL;
+    fired_missile_free(missile);
+
 }
 
 fired_missile_t fired_missile_new(location_t loc) {
     return (fired_missile_t){
-        .fired_time = (float)SDL_GetTicks() / 1000.f,
         .location = loc,
         .next = NULL
     };

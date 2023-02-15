@@ -4,6 +4,7 @@
 #include "private.h"
 
 #include <SDL2/SDL.h>
+#include <SDL_timer.h>
 #include <malloc.h>
 
 void alr56_recompute_priority(alr56_t *rwr) {
@@ -29,6 +30,7 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
         .handoff_mode = ALR56_HANDOFF_DIAMOND_FLOAT,
         .missile_launch = (alr56_blink_common_t){
             .blinks_remaining = 0,
+            .period = ALR56_LAUNCH_PERIOD,
         },
         .priority = false,
         .unknown = {
@@ -151,17 +153,33 @@ void alr56_lock(alr56_t *rwr, contact_t *contact) {
     }
 }
 
+struct alr56_missile_cb_param {
+    contact_t *contact;
+    fired_missile_t *msl;
+};
+
+static unsigned int alr56_missile_cb(unsigned int _, void *vparam) {
+    struct alr56_missile_cb_param *p = vparam;
+    contact_remove_missile(p->contact, p->msl);
+    free(p);
+    return 0;
+}
+
 void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
     if(contact->status != CONTACT_LOCK) {
         alr56_lock(rwr, contact);
     }
 
     fired_missile_t missile = fired_missile_new(contact->location);
-    contact_add_missile(contact, missile);
+    fired_missile_t *fired = contact_add_missile(contact, missile);
+    
+    struct alr56_missile_cb_param *param = malloc(sizeof(*param));
+    param->contact = contact;
+    param->msl = fired;
+    SDL_AddTimer(timer, alr56_missile_cb, param);
 
-    rwr->twp.missile_launch.blinks_remaining = 8;
-    rwr->twp.missile_launch.light = true;
-    rwr->twp.missile_launch.period_left = 0.25f;
+    rwr->twp.missile_launch.blinks_remaining = ALR56_LAUNCH_REPETITIONS;
+    alr56_blink_timer_set(&rwr->twp.missile_launch);
 
     tone_player_add_pri(rwr->tones, alr56_missile_tone());
 }
@@ -171,4 +189,24 @@ void alr56_free(alr56_t *rwr) {
         contact_delete(rwr->contacts[i]);
     }
     free(rwr);
+}
+
+static unsigned int alr56_blink_cb(unsigned int _, void *vparam) {
+    alr56_blink_common_t *blink = vparam;
+    blink->light = !blink->light;
+    blink->blinks_remaining -= 1;
+    if(blink->blinks_remaining == 0) {
+        blink->light = false;
+        return 0;
+    }
+
+    return (int)(blink->period * 1000.f);
+}
+
+void alr56_blink_timer_set(alr56_blink_common_t *blink) {
+    if(blink->timer != 0) {
+        SDL_RemoveTimer(blink->timer);
+        blink->timer = 0;
+    }
+    blink->timer = SDL_AddTimer((int)(blink->period * 1000.f), alr56_blink_cb, blink);
 }

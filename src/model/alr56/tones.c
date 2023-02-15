@@ -51,10 +51,10 @@ tone_sequence_t* alr56_newguy_surface_tone(void) {
 
 tone_sequence_t* alr56_missile_tone(void) {
     return TONE_SEQUENCE(
-        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = 10 }),
+        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = ALR56_LAUNCH_REPETITIONS }),
         (tone_t[]){
-            (tone_t){ .frequency = 1000, .amplitude = 1, .length = 0.1 },
-            (tone_t){ .amplitude = 0, .length = 0.1 }
+            (tone_t){ .frequency = 1000, .amplitude = 1, .length = ALR56_LAUNCH_PERIOD },
+            (tone_t){ .amplitude = 0, .length = ALR56_LAUNCH_PERIOD }
         }
     );
 }

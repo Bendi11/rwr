@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rwr/source.h"
+#include <SDL_timer.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -17,7 +18,7 @@ typedef struct location {
 /// A missile fired by a radar contact with an active lock
 typedef struct fired_missile {
     location_t location;
-    float fired_time;
+    SDL_TimerID timer;
     struct fired_missile *next;
 } fired_missile_t;
 
@@ -55,7 +56,9 @@ void contact_new(contact_t *contact, const source_t *source, location_t loc, con
 fired_missile_t fired_missile_new(location_t loc);
 
 /// Add a fired missile to the linked list of missiles fired by the given locked contact
-void contact_add_missile(contact_t *contact, fired_missile_t missile);
+fired_missile_t* contact_add_missile(contact_t *contact, fired_missile_t missile);
+
+void contact_remove_missile(contact_t *contact, fired_missile_t *missile);
 
 /// Free any memory allocated for the given contact
 void contact_delete(contact_t contact);

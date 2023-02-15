@@ -3,6 +3,7 @@
 #include "rwr.h"
 #include "rwr/tones.h"
 #include "rwr/source.h"
+#include <SDL_timer.h>
 #include <stddef.h>
 
 
@@ -33,7 +34,8 @@ typedef struct alr56_priority_contact {
 typedef struct alr56_blink_common {
     bool light;
     uint8_t blinks_remaining;
-    float period_left;
+    float period;
+    SDL_TimerID timer;
 } alr56_blink_common_t;
 
 enum {

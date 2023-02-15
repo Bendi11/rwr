@@ -1,6 +1,16 @@
 #pragma once
 #include "rwr/model/alr56.h"
 
+enum {
+    ALR56_CB_BLINK,
+    ALR56_CB_CHECKPING,
+};
+
+#define ALR56_LAUNCH_PERIOD (0.1f)
+#define ALR56_LAUNCH_REPETITIONS (10)
+
+void alr56_blink_timer_set(alr56_blink_common_t *blink);
+
 /// Clear the current priority target
 void alr56_clear_priority(alr56_t *rwr);
 
