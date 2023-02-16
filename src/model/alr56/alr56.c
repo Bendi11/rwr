@@ -150,6 +150,10 @@ void alr56_drop_contact(alr56_t *rwr, contact_t *contact) {
     contact_delete(*contact);
     contact->source = NULL;
 
+    if(rwr->priority.contact == contact) {
+        alr56_recompute_priority(rwr); 
+    }
+
     if(rwr->latest == contact) {
         rwr->latest = NULL;
     }

@@ -64,9 +64,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        SDL_Delay(16);
+        SDL_Delay(60);
 
-        //alr56_ping(rwr, contact, (location_t){ .bearing = 1.47, .distance = 15 });
+        alr56_ping(rwr, contact, (location_t){ .bearing = 1.47, .distance = 15 });
     }
 
     /*SDL_PauseAudio(0);
