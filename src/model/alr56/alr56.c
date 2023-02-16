@@ -50,6 +50,8 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
         .lock_tone = NULL
     };
 
+    rwr->periodic = SDL_AddTimer(ALR56_UPDATE_INTERVAL_MS, alr56_periodic_cb, rwr);
+
     return rwr;
 }
 
@@ -130,16 +132,33 @@ void alr56_clear_priority(alr56_t *rwr) {
     }
 }
 
-void alr56_drop(alr56_t *rwr, contact_t *contact) {
+void alr56_drop_lock(alr56_t *rwr, contact_t *contact) {
+    if(contact->status == CONTACT_LOCK) {
+        fired_missile_free(contact->lock.missiles);
+        contact->lock.missiles = NULL;
+        contact->status = CONTACT_SEARCH;
+        contact->search.last_ping = SDL_GetTicks64();
+        contact->location = contact->location;
+        if(rwr->priority.contact == contact) {
+            alr56_recompute_priority(rwr); 
+        }
+    }
+}
+
+void alr56_drop_contact(alr56_t *rwr, contact_t *contact) {
+    alr56_drop_lock(rwr, contact);
     contact_delete(*contact);
     contact->source = NULL;
 
-    if(rwr->priority.contact == contact) {
-        alr56_recompute_priority(rwr); 
-    }
-
     if(rwr->latest == contact) {
         rwr->latest = NULL;
+    }
+}
+
+void alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc) {
+    contact->location = loc;
+    if(contact->status == CONTACT_SEARCH) {
+        contact->search.last_ping = SDL_GetTicks64();
     }
 }
 
@@ -185,9 +204,12 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
 }
 
 void alr56_free(alr56_t *rwr) {
+    SDL_RemoveTimer(rwr->periodic);
+
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         contact_delete(rwr->contacts[i]);
     }
+
     free(rwr);
 }
 
@@ -209,4 +231,20 @@ void alr56_blink_timer_set(alr56_blink_common_t *blink) {
         blink->timer = 0;
     }
     blink->timer = SDL_AddTimer((int)(blink->period * 1000.f), alr56_blink_cb, blink);
+}
+
+unsigned int alr56_periodic_cb(unsigned int _, void *vrwr) {
+    alr56_t *rwr = (alr56_t*)vrwr;
+    uint64_t time = SDL_GetTicks64();
+    for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
+        contact_t *contact = &rwr->contacts[i];
+        if(
+            contact->source != NULL &&
+            contact->status == CONTACT_SEARCH &&
+            time - contact->search.last_ping >= ALR56_MS_BEFORE_DROP
+        ) {
+            alr56_drop_contact(rwr, contact);
+        }
+    }
+    return ALR56_UPDATE_INTERVAL_MS;
 }

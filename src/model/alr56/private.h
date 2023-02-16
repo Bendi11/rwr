@@ -8,7 +8,16 @@ enum {
 
 #define ALR56_LAUNCH_PERIOD (0.1f)
 #define ALR56_LAUNCH_REPETITIONS (10)
+#define ALR56_MS_BEFORE_DROP (5000)
+#define ALR56_UPDATE_INTERVAL_MS (1000)
 
+/// SDL timer callback to periodically update the RWR display, dropping contacts if no pings were received
+unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
+
+/// Remove the given contact from the RWR
+void alr56_drop_contact(alr56_t *rwr, contact_t *contact);
+
+/// Create a new SDL timer that will toggle the given blink state until it turns off
 void alr56_blink_timer_set(alr56_blink_common_t *blink);
 
 /// Clear the current priority target

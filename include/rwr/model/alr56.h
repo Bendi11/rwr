@@ -77,18 +77,19 @@ typedef struct alr56 {
     alr56_twa_t twa;
     alr56_priority_contact_t priority;
     contact_t *latest;
+    SDL_TimerID periodic;
 } alr56_t;
 
 /// Create a new ALR56 RWR model with no contacts
 alr56_t* alr56_new(tone_player_t *player);
 
-/// Update periodic state of the RWR 
-void alr56_update(alr56_t *rwr, float timestep);
-
 /// Attempt to create a new RWR that has painted the aircraft with search radar
 ///
 /// Returns NULL if the RWR has reached the maximum number of contacts
 contact_t *alr56_newguy(alr56_t *rwr, const source_t *source, location_t location);
+
+/// Paint the RWR receiver with radar, updating the position on the display
+void alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc);
 
 /// Upgrade the given contact to an STT lock
 void alr56_lock(alr56_t *rwr, contact_t *contact);
@@ -97,7 +98,7 @@ void alr56_lock(alr56_t *rwr, contact_t *contact);
 void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer);
 
 /// Drop the given RWR contact, breaking lock if gained
-void alr56_drop(alr56_t *rwr, contact_t *contact);
+void alr56_drop_lock(alr56_t *rwr, contact_t *contact);
 
 /// Free memory allocated for this model, does not free the tone player passed to the `alr56_new` function
 void alr56_free(alr56_t *rwr);

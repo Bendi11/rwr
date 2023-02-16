@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
     alr56_t *rwr = alr56_new(player);
     contact_t *contact;
     contact = alr56_newguy(rwr, &SOURCES[SOURCE_F16], (location_t){.bearing = 45 * 3.14195f / 180.f, .distance = 25});
+    alr56_lock(rwr, contact);
     alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 195 * 3.14195f / 180.f, .distance = 37});
 
 
@@ -52,15 +53,20 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     bool run = true;
     while(run) {
-        while(SDL_WaitEvent(&event) == 1) {
-            SDL_RenderClear(render);
-            alr56_render_scope(rwr, render);
-            SDL_RenderPresent(render);
+        SDL_RenderClear(render);
+        alr56_render_scope(rwr, render);
+        SDL_RenderPresent(render);
+
+        while(SDL_PollEvent(&event) == 1) {
             if(event.type == SDL_QUIT) {
                 run = false;
                 break;
             }
         }
+
+        SDL_Delay(16);
+
+        //alr56_ping(rwr, contact, (location_t){ .bearing = 1.47, .distance = 15 });
     }
 
     /*SDL_PauseAudio(0);

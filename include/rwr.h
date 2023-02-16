@@ -37,8 +37,7 @@ typedef struct contact {
     union {
         /// Additional state for an RWR contact that has painted the aircraft with a search radar
         struct contact_search {
-            size_t last_ping;
-            location_t last_loc;
+            uint64_t last_ping;
         } search;
         
         /// Additional state for an RWR contact that has an STT lock on the aircraft

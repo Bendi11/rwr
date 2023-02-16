@@ -75,8 +75,6 @@ void alr56_render_scope(alr56_t *rwr, SDL_Renderer *render) {
             SDL_RenderCopy(render, icons[contact->source->id], NULL, &dest);
         }
     }
-
-    SDL_RenderPresent(render);
 }
 
 static inline SDL_Texture *texture(SDL_Renderer *r, const void *data, int sz) {
