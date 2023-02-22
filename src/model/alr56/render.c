@@ -77,6 +77,10 @@ void alr56_render_scope(alr56_t *rwr, SDL_Renderer *render) {
     }
 }
 
+void alr56_render_twp(alr56_t *rwr, SDL_Renderer *render) {
+    SDL_RenderCopy(render, twp, NULL, NULL);
+}
+
 static inline SDL_Texture *texture(SDL_Renderer *r, const void *data, int sz) {
     SDL_RWops *rw = SDL_RWFromConstMem(data, sz);
     SDL_Surface *img = IMG_Load_RW(rw, SDL_FALSE);

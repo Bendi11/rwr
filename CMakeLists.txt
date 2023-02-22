@@ -37,6 +37,8 @@ set(
     "src/model/alr56/alr56.c"
     "src/model/alr56/tones.c"
     "src/model/alr56/render.c"
+    "src/schedule/schedule.c"
+    "src/schedule/list.c"
 )
 
 create_resources("${CMAKE_SOURCE_DIR}/asset/icon" "${CMAKE_BINARY_DIR}/generated/icons.h")
