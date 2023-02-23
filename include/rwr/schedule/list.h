@@ -1,15 +1,40 @@
 #pragma once
 
+#include "rwr.h"
+#include "rwr/source.h"
 #include <SDL_timer.h>
+
+typedef struct randrange {
+    float min;
+    float rlen;
+} randrange_t;
+
+typedef struct timerprofile {
+    contact_idx_t contact;
+
+    struct {
+        randrange_t total;
+        randrange_t ping;
+        float drop_p;
+    } search;
+
+    struct {
+        randrange_t total;
+        randrange_t ping;
+        float missile_p;
+        float drop_p;
+    } lock;
+} timerprofile_t;
 
 /// A single node in a `timerlist`
 typedef struct timerlist_node {
-    SDL_TimerID timer;
-    struct timerlist_node *prev;
+    timerprofile_t *profile;
+    contact_t *contact;
     struct timerlist_node *next;
+    SDL_TimerID timer;
 } timerlist_node_t;
 
-/// A doubly linked list of SDL_TimerID's
+/// A linked list of contact timers, contained in a schedule
 typedef struct timerlist {
     timerlist_node_t *root;
 } timerlist_t;

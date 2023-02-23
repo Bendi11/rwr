@@ -59,6 +59,7 @@ void alr56_render_scope(alr56_t *rwr, SDL_Renderer *render) {
 
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         contact_t *contact = &rwr->contacts[i];
+        if(contact->status == CONTACT_SEARCH && !rwr->twa.search) { continue; }
         if(contact->source != NULL) {
             float dist = clamp(contact->location.distance / ALR56_MAX_DISTANCE, 1.f);
             float x = cosf(-contact->location.bearing + 1.57079632679) * dist;

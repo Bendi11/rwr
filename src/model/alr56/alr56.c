@@ -65,19 +65,20 @@ contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t locatio
         }
     }
 
-
     if(contact != NULL) {
         rwr->latest = contact;
-        if(contact->source->location == RADAR_SOURCE_AIR) {
-            tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
-            tone_player_add_pri(rwr->tones, alr56_silence_tone());
-            tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
-            tone_player_add_pri(rwr->tones, alr56_silence_tone());
-        } else {
-            tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
-            tone_player_add_pri(rwr->tones, alr56_silence_tone());
-            tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
-            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+        if(rwr->twa.search) {
+            if(contact->source->location == RADAR_SOURCE_AIR) {
+                tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
+                tone_player_add_pri(rwr->tones, alr56_silence_tone());
+                tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
+                tone_player_add_pri(rwr->tones, alr56_silence_tone());
+            } else {
+                tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
+                tone_player_add_pri(rwr->tones, alr56_silence_tone());
+                tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
+                tone_player_add_pri(rwr->tones, alr56_silence_tone());
+            }
         }
 
         alr56_recompute_priority(rwr);

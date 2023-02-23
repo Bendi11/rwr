@@ -6,6 +6,8 @@
 
 #define SOURCE(sym, ...) SOURCE_##sym,
 
+typedef uint16_t contact_idx_t;
+
 enum {
     #include "list.h"
     SOURCES_COUNT
