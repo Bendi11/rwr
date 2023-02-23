@@ -67,6 +67,8 @@ unsigned int schedule_timer_cb(unsigned int time, void *vnode) {
     if(timer->contact->status == CONTACT_LOCK) {
         if(frand() <= timer->profile->lock.drop_p) {
             alr56_drop_lock(timer->schedule->rwr, timer->contact);
+            timer->time = 0.f;
+            timer->time_goal = rand_range(timer->profile->search.total);
             return rand_range(timer->profile->search.ping) * 1000.f;
         }
 
@@ -105,3 +107,30 @@ location_t rand_location(rand_location_t loc) {
 }
 
 float rand_range(randrange_t range) { return frand() * (range.max - range.min) + range.min; }
+
+const timerprofile_t SA10_PROF = (timerprofile_t){
+    .contact = SOURCE_SA10,
+    .initial_delay = {5.f, 7.f},
+    .initial_pos = {
+        .bearing = {0.f, (float)M_PI},
+        .distance = {0.2f, 35.f},
+        .altitude = {0.f, 750.f},
+    },
+    .movement = {
+        .bearing = {0.f, 0.f},
+        .altitude = {0.f, 0.f},
+        .distance = {0.f, 0.f}
+    },
+    .search = {
+        .total = {2.5f, 15.f},
+        .ping = {1.5f, 2.f},
+        .drop_p = 0.05f
+    },
+    .lock = {
+        .drop_p = 0.07f,
+        .missile_p = 0.2f,
+        .ping = {0.2f, 1.f},
+        .missile_duration = {1.7f, 5.f},
+        .max_missiles = 1
+    }
+};

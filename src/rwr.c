@@ -76,3 +76,16 @@ fired_missile_t fired_missile_new(location_t loc) {
         .next = NULL
     };
 }
+
+size_t contact_missiles_count(contact_t *contact) {
+    if(contact->status != CONTACT_LOCK) { return 0; }
+
+    size_t count = 0;
+    fired_missile_t *next = contact->lock.missiles;
+    while(next != NULL) {
+        next = next->next;
+        count += 1;
+    }
+
+    return count;
+}

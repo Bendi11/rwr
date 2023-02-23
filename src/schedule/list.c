@@ -6,8 +6,9 @@ static void schedule_timer_free(schedule_timer_t *node) {
     free(node);
 }
 
-void schedule_new(schedule_t *list) {
+void schedule_new(schedule_t *list, alr56_t *rwr) {
     list->root = NULL;
+    list->rwr = rwr;
 }
 
 schedule_timer_t* schedule_add(schedule_t *list, const timerprofile_t *prof) {

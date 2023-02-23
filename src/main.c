@@ -2,6 +2,7 @@
 #include "rwr.h"
 #include "rwr/model/alr56.h"
 #include "rwr/model/alr56/render.h"
+#include "rwr/schedule/schedule.h"
 #include "rwr/tones.h"
 #include <SDL2/SDL.h>
 #include <SDL_audio.h>
@@ -40,11 +41,10 @@ int main(int argc, char *argv[]) {
     SDL_OpenAudio(&spec, NULL);
 
     alr56_t *rwr = alr56_new(player);
-    contact_t *contact;
-    contact = alr56_newguy(rwr, &SOURCES[SOURCE_F16], (location_t){.bearing = 45 * 3.14195f / 180.f, .distance = 25});
-    alr56_lock(rwr, contact);
-    alr56_newguy(rwr, &SOURCES[SOURCE_SA10], (location_t){.bearing = 195 * 3.14195f / 180.f, .distance = 37});
+    schedule_t schedule;
+    schedule_new(&schedule, rwr);
 
+    schedule_add(&schedule, &SA10_PROF);
 
     SDL_Window *window = NULL;
     SDL_Renderer *render = NULL;
@@ -65,29 +65,11 @@ int main(int argc, char *argv[]) {
         }
 
         SDL_Delay(60);
-
-        alr56_ping(rwr, contact, (location_t){ .bearing = 1.47, .distance = 15 });
     }
 
-    /*SDL_PauseAudio(0);
-    SDL_Delay(2193);
-
-    alr56_lock(rwr, contact);
-
-    SDL_Delay(3976);
-
-    contact_t *nc = alr56_newguy(rwr, &SOURCES[SOURCE_F16], (location_t){0});
-
-    SDL_Delay(3470);
-
-    alr56_missile(rwr, contact, 10);
-
-    SDL_Delay(3819);
-
-    alr56_lock(rwr, nc);
-
-    SDL_Delay(2000);*/
-    
+    schedule_free(&schedule);
+    alr56_free(rwr);
+        
     SDL_DestroyWindow(window);
     SDL_CloseAudio();
     SDL_Quit();
