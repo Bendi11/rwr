@@ -57,6 +57,10 @@ fired_missile_t fired_missile_new(location_t loc);
 /// Add a fired missile to the linked list of missiles fired by the given locked contact
 fired_missile_t* contact_add_missile(contact_t *contact, fired_missile_t missile);
 
+/// Get the number of missiles fired by this contact
+size_t contact_missiles_count(contact_t *contact);
+
+/// Remove a fired missile from the linked list of a locked RWR contact
 void contact_remove_missile(contact_t *contact, fired_missile_t *missile);
 
 /// Free any memory allocated for the given contact

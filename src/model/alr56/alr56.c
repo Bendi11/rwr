@@ -189,7 +189,7 @@ static unsigned int alr56_missile_cb(unsigned int _, void *vparam) {
     return 0;
 }
 
-void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
+void alr56_missile(alr56_t *rwr, contact_t *contact, float timer) {
     if(contact->status != CONTACT_LOCK) {
         alr56_lock(rwr, contact);
     }
@@ -200,7 +200,7 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, uint32_t timer) {
     struct alr56_missile_cb_param *param = malloc(sizeof(*param));
     param->contact = contact;
     param->msl = fired;
-    SDL_AddTimer(timer, alr56_missile_cb, param);
+    SDL_AddTimer(timer * 1000.f, alr56_missile_cb, param);
 
     rwr->twp.missile_launch.blinks_remaining = ALR56_LAUNCH_REPETITIONS;
     alr56_blink_timer_set(&rwr->twp.missile_launch);
