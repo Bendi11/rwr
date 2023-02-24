@@ -40,6 +40,8 @@ void contact_delete(contact_t contact) {
 }
 
 void fired_missile_free(fired_missile_t *msl) {
+    if(msl == NULL) { return; }
+
     if(msl->next) {
         fired_missile_free(msl->next);
     }

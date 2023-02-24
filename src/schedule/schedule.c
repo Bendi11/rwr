@@ -10,6 +10,8 @@ schedule_timer_t *schedule_timer_new(schedule_t *schedule, const timerprofile_t 
     node->contact = NULL;
     node->profile = profile;
     node->timer = SDL_AddTimer(0, schedule_timer_cb, node);
+    node->time = 0.f;
+    node->time_goal = 0.f;
     return node;
 }
 
@@ -117,7 +119,7 @@ const timerprofile_t SA10_PROF = (timerprofile_t){
         .altitude = {0.f, 750.f},
     },
     .movement = {
-        .bearing = {0.f, 0.f},
+        .bearing = {10.f, 10.f},
         .altitude = {0.f, 0.f},
         .distance = {0.f, 0.f}
     },
