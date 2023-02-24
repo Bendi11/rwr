@@ -40,6 +40,7 @@ typedef struct tone_write_tuple {
 
 static tone_write_tuple_t write_seq(tone_player_t *player, tone_sequence_t *next, float *buf, int len, bool priority) {
     size_t samples = 0;
+
     for(;;) {
         samples += write_tone(player, buf + samples, &next->tones[next->tone_idx], len - samples);
         if(samples < (size_t)len) {
@@ -94,6 +95,7 @@ void tone_player_fill_buf(tone_player_t *player, float *buf, int len) {
     }
 
     next = player->tones;
+
 
     while(next != NULL) { next = write_seq(player, next, buf, len, false).next; }
 }

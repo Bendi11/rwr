@@ -64,3 +64,4 @@ void schedule_remove(schedule_t *list, schedule_timer_t *node);
 void schedule_free(schedule_t *list);
 
 const extern timerprofile_t SA10_PROF;
+const extern timerprofile_t F16_PROF;

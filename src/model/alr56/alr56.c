@@ -141,6 +141,7 @@ void alr56_drop_lock(alr56_t *rwr, contact_t *contact) {
         contact->search.last_ping = SDL_GetTicks64();
         contact->location = contact->location;
         if(rwr->priority.contact == contact) {
+            alr56_clear_priority(rwr);
             alr56_recompute_priority(rwr); 
         }
     }

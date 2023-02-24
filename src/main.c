@@ -1,4 +1,5 @@
 
+#include "model/alr56/private.h"
 #include "rwr.h"
 #include "rwr/model/alr56.h"
 #include "rwr/model/alr56/render.h"
@@ -27,7 +28,7 @@ int main(int argc, char *argv[]) {
     TTF_Init();
 
     tone_player_t *player = tone_player_new(44100);
-    tone_player_set_volume(player, 0.05);
+    tone_player_set_volume(player, 1.f);
 
     SDL_AudioSpec spec;
     SDL_zero(spec);
@@ -38,13 +39,14 @@ int main(int argc, char *argv[]) {
     spec.callback = test_cb;
     spec.userdata = player;
 
-    SDL_OpenAudio(&spec, NULL);
-
+    SDL_AudioDeviceID id = SDL_OpenAudioDevice(NULL, 0, &spec, NULL, 0);
+    SDL_PauseAudioDevice(id, 0);
+    
     alr56_t *rwr = alr56_new(player);
     schedule_t schedule;
     schedule_new(&schedule, rwr);
 
-    schedule_add(&schedule, &SA10_PROF);
+    schedule_add(&schedule, &F16_PROF);
 
     SDL_Window *window = NULL;
     SDL_Renderer *render = NULL;

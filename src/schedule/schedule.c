@@ -187,7 +187,7 @@ const timerprofile_t SA10_PROF = (timerprofile_t){
     .contact = SOURCE_SA10,
     .initial_delay = {5.f, 7.f},
     .initial_pos = {
-        .bearing = {0.f, 2 * (float)M_PI},
+        .bearing = {0.f, (float)M_2_PI},
         .distance = {0.2f, 35.f},
         .altitude = {0.f, 750.f},
     },
@@ -199,7 +199,7 @@ const timerprofile_t SA10_PROF = (timerprofile_t){
     .search = {
         .total = {2.5f, 5.f},
         .ping = {1.5f, 2.f},
-        .drop_p = 0.5f
+        .drop_p = 0.05f
     },
     .lock = {
         .drop_p = 0.07f,
@@ -207,5 +207,32 @@ const timerprofile_t SA10_PROF = (timerprofile_t){
         .ping = {0.2f, 1.f},
         .missile_duration = {1.7f, 5.f},
         .max_missiles = 1
+    }
+};
+
+const timerprofile_t F16_PROF = (timerprofile_t){
+    .contact = SOURCE_F16,
+    .initial_delay = {1.5f, 10.f},
+    .initial_pos = {
+        .bearing = {0.f, (float)M_2_PI},
+        .altitude = {150.f, 30000.f},
+        .distance = {0.1f, 50.f},
+    },
+    .movement = {
+        .bearing = { -(M_PI_4 / 10), M_PI_4 / 10 },
+        .altitude = { -200.f, 200.f },
+        .distance = { -1.f, 1.f },
+    },
+    .search = {
+        .total = { 3.f, 15.f },
+        .ping = { 0.5f, 3.f },
+        .drop_p = 0.09f,
+    },
+    .lock = {
+        .drop_p = 0.15f,
+        .missile_p = 0.1f,
+        .ping = { 0.2f, 1.f },
+        .missile_duration = { 3.f, 15.f },
+        .max_missiles = 2,
     }
 };
