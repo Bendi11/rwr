@@ -1,7 +1,80 @@
 #include "rwr/schedule/schedule.h"
-#include "priv.h"
 #include "rwr/model/alr56.h"
 #include <stdlib.h>
+
+
+/// A single node in a `schedule` that acts out one RWR contact
+typedef struct schedule_timer {
+    struct schedule *schedule;
+    const timerprofile_t *profile;
+    contact_t *contact;
+    struct schedule_timer *next;
+    SDL_TimerID timer;
+    /// Time that has passed since the last transition (search->lock, start->search)
+    float time;
+    /// A randomly generated time that will determine when the next transition occurs
+    float time_goal;
+} schedule_timer_t;
+
+/// Timer callback executed for each timer list node
+unsigned int schedule_timer_cb(unsigned int time, void *vnode);
+
+/// Create a new timer list node from a profile
+schedule_timer_t *schedule_timer_new(schedule_t *schedule, const timerprofile_t *prof);
+
+/// Generate a random location from a collection of random ranges
+location_t rand_location(rand_location_t loc);
+
+/// Generate a random number in the range described by `range`
+float rand_range(randrange_t range);
+
+static void schedule_timer_free(schedule_timer_t *node) {
+    SDL_RemoveTimer(node->timer);
+    free(node);
+}
+
+void schedule_new(schedule_t *list, alr56_t *rwr) {
+    list->root = NULL;
+    list->rwr = rwr;
+}
+
+schedule_timer_t* schedule_add(schedule_t *list, const timerprofile_t *prof) {
+    if(list->root == NULL) {
+        list->root = schedule_timer_new(list, prof);
+        return list->root;
+    }
+
+    schedule_timer_t *last = list->root;
+    while(last->next != NULL) { last = last->next; }
+    
+    last->next = schedule_timer_new(list, prof);
+    return last->next;
+}
+
+void schedule_remove(schedule_t *list, schedule_timer_t *node) {
+    if(node == list->root) {
+        list->root = list->root->next;
+        schedule_timer_free(node);
+    }
+    schedule_timer_t *find = list->root;
+    while(find != NULL && find->next != node) {
+        find = find->next;
+    }
+
+    if(find != NULL && find->next == node) {
+        find->next = node->next;
+        schedule_timer_free(node);
+    }
+}
+
+void schedule_free(schedule_t *list) {
+    schedule_timer_t *node = list->root;
+    while(node != NULL) {
+        schedule_timer_t *next = node->next;
+        schedule_timer_free(node);
+        node = next;
+    }
+}
 
 schedule_timer_t *schedule_timer_new(schedule_t *schedule, const timerprofile_t *profile) {
     schedule_timer_t *node = malloc(sizeof(*node));
@@ -114,19 +187,19 @@ const timerprofile_t SA10_PROF = (timerprofile_t){
     .contact = SOURCE_SA10,
     .initial_delay = {5.f, 7.f},
     .initial_pos = {
-        .bearing = {0.f, (float)M_PI},
+        .bearing = {0.f, 2 * (float)M_PI},
         .distance = {0.2f, 35.f},
         .altitude = {0.f, 750.f},
     },
     .movement = {
-        .bearing = {10.f, 10.f},
+        .bearing = {0.f, 0.f},
         .altitude = {0.f, 0.f},
         .distance = {0.f, 0.f}
     },
     .search = {
-        .total = {2.5f, 15.f},
+        .total = {2.5f, 5.f},
         .ping = {1.5f, 2.f},
-        .drop_p = 0.05f
+        .drop_p = 0.5f
     },
     .lock = {
         .drop_p = 0.07f,
