@@ -43,7 +43,7 @@ void schedule_remove(schedule_t *list, schedule_timer_t *node) {
 void schedule_free(schedule_t *list) {
     schedule_timer_t *node = list->root;
     while(node != NULL) {
-        schedule_timer_t *next = node;
+        schedule_timer_t *next = node->next;
         schedule_timer_free(node);
         node = next;
     }
