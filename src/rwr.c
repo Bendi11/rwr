@@ -72,6 +72,15 @@ void contact_remove_missile(contact_t *contact, fired_missile_t *missile) {
 
 }
 
+bool contact_has_missile(contact_t *contact, fired_missile_t *missile) {
+    if(contact->status != CONTACT_LOCK) { return false; }
+    fired_missile_t *node = contact->lock.missiles;
+
+    while(node != missile && node != NULL) { node = node->next;}
+    
+    return node == missile;
+}
+
 fired_missile_t fired_missile_new(location_t loc) {
     return (fired_missile_t){
         .location = loc,

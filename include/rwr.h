@@ -60,6 +60,9 @@ fired_missile_t* contact_add_missile(contact_t *contact, fired_missile_t missile
 /// Get the number of missiles fired by this contact
 size_t contact_missiles_count(contact_t *contact);
 
+/// Check if the contact still contains the given fired missile
+bool contact_has_missile(contact_t *contact, fired_missile_t *missile);
+
 /// Remove a fired missile from the linked list of a locked RWR contact
 void contact_remove_missile(contact_t *contact, fired_missile_t *missile);
 

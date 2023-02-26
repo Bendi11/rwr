@@ -94,8 +94,8 @@ void alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc);
 /// Upgrade the given contact to an STT lock
 void alr56_lock(alr56_t *rwr, contact_t *contact);
 
-/// Launch a missile from the given target that expires after the specified number of seconds passes
-void alr56_missile(alr56_t *rwr, contact_t *contact, float timer);
+/// Launch a missile from the given target
+fired_missile_t* alr56_missile(alr56_t *rwr, contact_t *contact);
 
 /// Drop the given RWR contact, breaking lock if gained
 void alr56_drop_lock(alr56_t *rwr, contact_t *contact);

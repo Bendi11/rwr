@@ -179,18 +179,24 @@ void alr56_lock(alr56_t *rwr, contact_t *contact) {
 }
 
 struct alr56_missile_cb_param {
+    alr56_t *rwr;
     contact_t *contact;
     fired_missile_t *msl;
 };
 
-static unsigned int alr56_missile_cb(unsigned int _, void *vparam) {
+static unsigned int alr56_missile_recycle_cb(unsigned int _, void *vparam) {
     struct alr56_missile_cb_param *p = vparam;
-    contact_remove_missile(p->contact, p->msl);
-    free(p);
-    return 0;
+    if(!contact_has_missile(p->contact, p->msl)) { free(p); return 0; }
+    
+    p->rwr->twp.missile_launch.blinks_remaining = ALR56_LAUNCH_REPETITIONS;
+    alr56_blink_timer_set(&p->rwr->twp.missile_launch);
+
+    tone_player_add_pri(p->rwr->tones, alr56_missile_recycle_tone());
+
+    return ALR56_MISSILE_RECYCLE_INTERVAL_MS;
 }
 
-void alr56_missile(alr56_t *rwr, contact_t *contact, float timer) {
+fired_missile_t* alr56_missile(alr56_t *rwr, contact_t *contact) {
     if(contact->status != CONTACT_LOCK) {
         alr56_lock(rwr, contact);
     }
@@ -201,12 +207,10 @@ void alr56_missile(alr56_t *rwr, contact_t *contact, float timer) {
     struct alr56_missile_cb_param *param = malloc(sizeof(*param));
     param->contact = contact;
     param->msl = fired;
-    SDL_AddTimer(timer * 1000.f, alr56_missile_cb, param);
+    param->rwr = rwr;
+    SDL_AddTimer(1, alr56_missile_recycle_cb, param);
 
-    rwr->twp.missile_launch.blinks_remaining = ALR56_LAUNCH_REPETITIONS;
-    alr56_blink_timer_set(&rwr->twp.missile_launch);
-
-    tone_player_add_pri(rwr->tones, alr56_missile_tone());
+    return fired;
 }
 
 void alr56_free(alr56_t *rwr) {

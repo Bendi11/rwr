@@ -10,6 +10,7 @@ enum {
 #define ALR56_LAUNCH_REPETITIONS (10)
 #define ALR56_MS_BEFORE_DROP (5000)
 #define ALR56_UPDATE_INTERVAL_MS (1000)
+#define ALR56_MISSILE_RECYCLE_INTERVAL_MS (15000)
 
 /// SDL timer callback to periodically update the RWR display, dropping contacts if no pings were received
 unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
@@ -42,5 +43,7 @@ tone_sequence_t* alr56_newguy_air_tone(void);
 tone_sequence_t* alr56_newguy_surface_tone(void);
 
 tone_sequence_t* alr56_missile_tone(void);
+
+tone_sequence_t* alr56_missile_recycle_tone(void);
 
 tone_sequence_t* alr56_silence_tone(void);

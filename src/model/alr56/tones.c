@@ -59,6 +59,16 @@ tone_sequence_t* alr56_missile_tone(void) {
     );
 }
 
+tone_sequence_t* alr56_missile_recycle_tone(void) {
+    return TONE_SEQUENCE(
+        TONE_SEQUENCE_END(TONE_SEQUENCE_LOOPFOR, .loopfor = { .loops = ALR56_LAUNCH_REPETITIONS }),
+        (tone_t[]){
+            (tone_t){ .frequency = 515, .amplitude = 1, .length = ALR56_LAUNCH_PERIOD },
+            (tone_t){ .amplitude = 0, .length = ALR56_LAUNCH_PERIOD }
+        }
+    );
+}
+
 tone_sequence_t* alr56_silence_tone(void) {
     return TONE_SEQUENCE(
         TONE_SEQUENCE_END(TONE_SEQUENCE_STOP),
