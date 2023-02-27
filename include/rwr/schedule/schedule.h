@@ -15,13 +15,14 @@ enum {
 
 typedef uint8_t rwr_schedule_event_tag_t;
 
-typedef uint8_t rwr_scheduled_contact_t;
-typedef uint8_t rwr_scheduled_missile_t;
+typedef uint16_t rwr_scheduled_contact_t;
+typedef uint16_t rwr_scheduled_missile_t;
 
 /// An event that is scheduled to happen at a specific time in an `rwr_schedule_t`
 typedef struct rwr_schedule_event {
     rwr_schedule_event_tag_t tag;
     rwr_scheduled_contact_t contact;
+    uint32_t time_ms;
 
     union {
         struct {
@@ -47,9 +48,22 @@ typedef struct rwr_schedule_event {
     };
 } rwr_schedule_event_t;
 
-typedef struct rwr_schedule {
-    alr56_t *rwr;
+typedef struct rwr_schedule rwr_schedule_t;
 
-} rwr_schedule_t;
+/// Create a new empty rwr schedule
+rwr_schedule_t *rwr_schedule_new(void);
 
+/// Add a new event to the schedule
+void rwr_schedule_add_event(rwr_schedule_t *schedule, rwr_schedule_event_t event);
 
+/// Create a new contact to be filled by a new contact event
+rwr_scheduled_contact_t rwr_schedule_new_contact(rwr_schedule_t *schedule);
+
+/// Create a new missile entry to be filled by a fired missile event
+rwr_scheduled_missile_t rwr_schedule_new_missile(rwr_schedule_t *schedule);
+
+/// Start running the given schedule, dispatching events to the RWR
+SDL_TimerID rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr);
+
+/// Free all resources associated with the given schedule, killing all timers that have been started using it
+void rwr_schedule_free(rwr_schedule_t *schedule);

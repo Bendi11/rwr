@@ -43,10 +43,6 @@ int main(int argc, char *argv[]) {
     SDL_PauseAudioDevice(id, 0);
     
     alr56_t *rwr = alr56_new(player);
-    schedule_t schedule;
-    schedule_new(&schedule, rwr);
-
-    schedule_add(&schedule, &F16_PROF);
 
     SDL_Window *window = NULL;
     SDL_Renderer *render = NULL;
@@ -69,7 +65,7 @@ int main(int argc, char *argv[]) {
         SDL_Delay(60);
     }
 
-    schedule_free(&schedule);
+    rwr_schedule_free(&schedule);
     alr56_free(rwr);
         
     SDL_DestroyWindow(window);
