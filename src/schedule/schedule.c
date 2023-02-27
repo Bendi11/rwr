@@ -21,6 +21,53 @@ rwr_scheduled_missile_t rwr_schedule_new_missile(rwr_schedule_t *schedule) { ret
 
 unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
     rwr_schedule_t *schedule = (rwr_schedule_t*)vparam;
+    if(schedule->run.event == schedule->events.len) { return 0; }
+
+    rwr_schedule_event_t *ev = &schedule->events.array[schedule->run.event];
+    schedule->run.event += 1;
+    schedule->run.time += time;
+    
+    switch(ev->tag) {
+        case RWR_SCHEDULE_EVENT_NEWGUY: {
+            if(schedule->run.contacts[ev->contact] != NULL) {
+                fputs("Attempt to create a new contact in schedule when contact is already initialized", stderr);
+                return 0;
+            }
+
+            schedule->run.contacts[ev->contact] = alr56_newguy(
+                schedule->run.rwr,
+                ev->newguy.source,
+                ev->newguy.loc
+            );
+        } break;
+
+        case RWR_SCHEDULE_EVENT_PAINT: {
+            schedule->run.contacts[ev->contact] = alr56_ping(
+                schedule->run.rwr,
+                schedule->run.contacts[ev->contact],
+                ev->paint.loc
+            );
+        } break;
+    }
+
+    return schedule->events.array[schedule->run.event].time_ms - schedule->run.time;
+}
+
+void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr) {
+    rwr_schedule_stop(schedule);
+    schedule->run.rwr = rwr;
+    schedule->run.event = 0;
+     
+}
+
+void rwr_schedule_stop(rwr_schedule_t *schedule) {
+    if(schedule->run.rwr != NULL) { return; }
+    
+    SDL_RemoveTimer(schedule->run.timer);
+    schedule->run.rwr = NULL;
+    for(size_t i = 0; i < schedule->events.len; ++i) {
+    
+    }
 }
 
 void rwr_schedule_add_event(rwr_schedule_t *schedule, rwr_schedule_event_t event) {

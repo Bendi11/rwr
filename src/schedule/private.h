@@ -18,11 +18,17 @@ typedef struct rwr_schedule {
     /// All state that is populated when the schedule is run on an RWR model
     struct {
         alr56_t *rwr;
-
+        /// Array mapping `rwr_scheduled_contact_t` values to contact instances
+        contact_t **contacts;
+        /// Array mapping `rwr_scheduled_missile_t` values to fired missiles
+        fired_missile_t **missiles;
+        /// Timer that is running through the schedule events
+        SDL_TimerID timer;
+        /// The current time in milliseconds
+        size_t time;
         size_t event;
     } run;
 } rwr_schedule_t;
-
 
 /// Double the capacity of the events buffer
 void rwr_schedule_expand_events(rwr_schedule_t *schedule);

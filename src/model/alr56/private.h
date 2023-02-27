@@ -15,11 +15,14 @@ enum {
 /// SDL timer callback to periodically update the RWR display, dropping contacts if no pings were received
 unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
 
-/// Remove the given contact from the RWR
-void alr56_drop_contact(alr56_t *rwr, contact_t *contact);
-
 /// Create a new SDL timer that will toggle the given blink state until it turns off
 void alr56_blink_timer_set(alr56_blink_common_t *blink);
+
+/// Move the given contact to the forgotten list
+contact_t* alr56_forget_contact(alr56_t *rwr, contact_t *contact);
+
+/// Move the given contact from the forgotten list to the active contacts list, if there is an empty spot on the contacts list
+contact_t* alr56_remember_contact(alr56_t *rwr, contact_t *contact);
 
 /// Clear the current priority target
 void alr56_clear_priority(alr56_t *rwr);

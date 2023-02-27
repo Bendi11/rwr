@@ -4,6 +4,7 @@
 #include <math.h>
 
 enum {
+    RWR_SCHEDULE_EVENT_NEWGUY,
     RWR_SCHEDULE_EVENT_PAINT,
     RWR_SCHEDULE_EVENT_LOCK,
     RWR_SCHEDULE_EVENT_DROP_LOCK,
@@ -25,6 +26,11 @@ typedef struct rwr_schedule_event {
     uint32_t time_ms;
 
     union {
+        struct {
+            location_t loc;
+            const source_t *source;
+        } newguy;
+
         struct {
             location_t loc;
         } paint;
@@ -63,7 +69,10 @@ rwr_scheduled_contact_t rwr_schedule_new_contact(rwr_schedule_t *schedule);
 rwr_scheduled_missile_t rwr_schedule_new_missile(rwr_schedule_t *schedule);
 
 /// Start running the given schedule, dispatching events to the RWR
-SDL_TimerID rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr);
+void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr);
+
+/// Stop running the given schedule
+void rwr_schedule_stop(rwr_schedule_t *schedule);
 
 /// Free all resources associated with the given schedule, killing all timers that have been started using it
 void rwr_schedule_free(rwr_schedule_t *schedule);

@@ -72,12 +72,17 @@ typedef struct alr56_twa {
 /// Model for the ALR-56M RWR
 typedef struct alr56 {
     contact_t contacts[ALR56_MAX_CONTACTS];
-    tone_player_t *tones;
     alr56_twp_t twp;
     alr56_twa_t twa;
     alr56_priority_contact_t priority;
+    tone_player_t *tones;
     contact_t *latest;
     SDL_TimerID periodic;
+
+    struct alr56_forgotten_link {
+        contact_t contact;
+        struct alr56_forgotten_link *next;
+    } *forgotten;
 } alr56_t;
 
 /// Create a new ALR56 RWR model with no contacts
@@ -86,10 +91,18 @@ alr56_t* alr56_new(tone_player_t *player);
 /// Attempt to create a new RWR that has painted the aircraft with search radar
 ///
 /// Returns NULL if the RWR has reached the maximum number of contacts
-contact_t *alr56_newguy(alr56_t *rwr, const source_t *source, location_t location);
+contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t location);
+
+/// Check if the given contact has been forgotten by the RWR because it has not been pinged
+bool alr56_contact_forgotten(alr56_t *rwr, const contact_t *contact);
 
 /// Paint the RWR receiver with radar, updating the position on the display
-void alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc);
+///
+/// Returns a pointer to the new contact location if the contact has been moved to the forgotten buffer
+contact_t* alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc);
+
+/// Drop the given contact from the RWR, freeing the memory allocated for the contact
+void alr56_drop(alr56_t *rwr, contact_t *contact);
 
 /// Upgrade the given contact to an STT lock
 void alr56_lock(alr56_t *rwr, contact_t *contact);

@@ -51,6 +51,7 @@ alr56_t* alr56_new(tone_player_t *tone_player) {
     };
 
     rwr->periodic = SDL_AddTimer(ALR56_UPDATE_INTERVAL_MS, alr56_periodic_cb, rwr);
+    rwr->forgotten = NULL;
 
     return rwr;
 }
@@ -147,7 +148,7 @@ void alr56_drop_lock(alr56_t *rwr, contact_t *contact) {
     }
 }
 
-void alr56_drop_contact(alr56_t *rwr, contact_t *contact) {
+void alr56_drop(alr56_t *rwr, contact_t *contact) {
     alr56_drop_lock(rwr, contact);
     contact_delete(*contact);
     contact->source = NULL;
@@ -253,8 +254,61 @@ unsigned int alr56_periodic_cb(unsigned int _, void *vrwr) {
             contact->status == CONTACT_SEARCH &&
             time - contact->search.last_ping >= ALR56_MS_BEFORE_DROP
         ) {
-            alr56_drop_contact(rwr, contact);
+            alr56_drop(rwr, contact);
         }
     }
     return ALR56_UPDATE_INTERVAL_MS;
+}
+
+bool alr56_contact_forgotten(alr56_t *rwr, const contact_t *contact) {
+    return contact < rwr->contacts && (contact > (rwr->contacts + ALR56_MAX_CONTACTS));
+}
+
+contact_t* alr56_forget_contact(alr56_t *rwr, contact_t *contact) {
+    if(alr56_contact_forgotten(rwr, contact)) { return contact; }
+
+    struct alr56_forgotten_link *forgotten = malloc(sizeof(*forgotten));
+    forgotten->contact = *contact;
+    forgotten->next = NULL;
+    contact->source = NULL;
+
+    if(rwr->forgotten == NULL) {
+        rwr->forgotten = forgotten;
+    } else {
+        struct alr56_forgotten_link *node = rwr->forgotten;
+        while(node->next != NULL) { node = node->next; }
+        node->next = forgotten;
+    }
+
+    return &forgotten->contact;
+}
+
+contact_t *alr56_remember_contact(alr56_t *rwr, contact_t *contact) {
+    if(alr56_contact_forgotten(rwr, contact) || rwr->forgotten == NULL) { return contact; }
+
+    contact_t *empty_slot = NULL;
+    for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
+        if(rwr->contacts[i].source == NULL) {
+            empty_slot = &rwr->contacts[i];
+            break;
+        }
+    }
+
+    if(empty_slot == NULL) { return contact; }
+    
+    *empty_slot = *contact;
+    if(&rwr->forgotten->contact == contact) {
+        struct alr56_forgotten_link *tmp = rwr->forgotten;
+        rwr->forgotten = rwr->forgotten->next;
+        free(tmp);
+    } else {
+        struct alr56_forgotten_link *node = rwr->forgotten;
+        while(node->next != NULL && &node->next->contact != contact) {
+            node = node->next;
+        }
+
+        struct alr56_forgotten_link *tmp = node->next;
+        node->next = tmp->next;
+        free(tmp);
+    }
 }
