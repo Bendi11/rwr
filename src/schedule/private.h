@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rwr/schedule/schedule.h>
+#include <rwr/schedule/builder.h>
 #include <stdlib.h>
 
 /// A schedule of events that happen to an RWR on a given timespan
@@ -19,7 +20,7 @@ typedef struct rwr_schedule {
     struct {
         alr56_t *rwr;
         /// Array mapping `rwr_scheduled_contact_t` values to contact instances
-        contact_t **contacts;
+        contact_id_t *contacts;
         /// Array mapping `rwr_scheduled_missile_t` values to fired missiles
         fired_missile_t **missiles;
         /// Timer that is running through the schedule events
@@ -30,8 +31,21 @@ typedef struct rwr_schedule {
     } run;
 } rwr_schedule_t;
 
+typedef struct rwr_encounter_builder {
+    
+} rwr_encounter_builder_t;
+
 /// Used to sort the events list by the time the event occurs
 int rwr_schedule_cmp_events(const void *v1, const void *v2);
 
 /// Double the capacity of the events buffer
 void rwr_schedule_expand_events(rwr_schedule_t *schedule);
+
+/// Add a new event to the schedule
+void rwr_schedule_add_event(rwr_schedule_t *schedule, rwr_schedule_event_t event);
+
+/// Create a new contact to be filled by a new contact event
+rwr_scheduled_contact_t rwr_schedule_new_contact(rwr_schedule_t *schedule);
+
+/// Create a new missile entry to be filled by a fired missile event
+rwr_scheduled_missile_t rwr_schedule_new_missile(rwr_schedule_t *schedule);

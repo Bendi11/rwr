@@ -1,4 +1,5 @@
 #include "rwr/schedule/schedule.h"
+#include "rwr.h"
 #include "rwr/model/alr56.h"
 #include "private.h"
 #include <stdlib.h>
@@ -29,7 +30,7 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
     
     switch(ev->tag) {
         case RWR_SCHEDULE_EVENT_NEWGUY: {
-            if(schedule->run.contacts[ev->contact] != NULL) {
+            if(schedule->run.contacts[ev->contact] != INVALID_CONTACT_ID) {
                 fputs("Attempt to create a new contact in schedule when contact is already initialized", stderr);
                 return 0;
             }
@@ -42,7 +43,7 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
         } break;
 
         case RWR_SCHEDULE_EVENT_PAINT: {
-            schedule->run.contacts[ev->contact] = alr56_ping_impl(
+            alr56_ping(
                 schedule->run.rwr,
                 schedule->run.contacts[ev->contact],
                 ev->paint.loc
@@ -50,13 +51,27 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
         } break;
 
         case RWR_SCHEDULE_EVENT_DROP: {
-            alr56_drop_impl(schedule->run.rwr, schedule->run.contacts[ev->contact]);
-            schedule->run.contacts[ev->contact] = NULL;
+            alr56_drop(schedule->run.rwr, schedule->run.contacts[ev->contact]);
+            schedule->run.contacts[ev->contact] = INVALID_CONTACT_ID;
         } break;
 
         case RWR_SCHEDULE_EVENT_DROP_LOCK: {
-            alr56_drop_lock_impl(schedule->run.rwr, schedule->run.contacts[ev->contact]);
-        }
+            alr56_drop_lock(schedule->run.rwr, schedule->run.contacts[ev->contact]);
+        } break;
+
+        case RWR_SCHEDULE_EVENT_FIRE_MISSILE: {
+            schedule->run.missiles[ev->fire_missile.missile] = alr56_missile(schedule->run.rwr, schedule->run.contacts[ev->contact]);
+        } break;
+
+        case RWR_SCHEDULE_EVENT_MISSILE_PING: {
+            schedule->run.missiles[ev->missile_ping.missile]->location = ev->missile_ping.loc;
+        } break;
+
+        case RWR_SCHEDULE_EVENT_DROP_MISSILE: {
+            contact_t *contact = alr56_lookup_contact(schedule->run.rwr, ev->contact);
+            fired_missile_t *missile = schedule->run.missiles[ev->drop_missile.missile];
+            contact_remove_missile(contact, missile);
+        } break;
     }
 
     return schedule->events.array[schedule->run.event].time_ms - schedule->run.time;

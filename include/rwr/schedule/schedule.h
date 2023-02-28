@@ -59,15 +59,6 @@ typedef struct rwr_schedule rwr_schedule_t;
 /// Create a new empty rwr schedule
 rwr_schedule_t *rwr_schedule_new(void);
 
-/// Add a new event to the schedule
-void rwr_schedule_add_event(rwr_schedule_t *schedule, rwr_schedule_event_t event);
-
-/// Create a new contact to be filled by a new contact event
-rwr_scheduled_contact_t rwr_schedule_new_contact(rwr_schedule_t *schedule);
-
-/// Create a new missile entry to be filled by a fired missile event
-rwr_scheduled_missile_t rwr_schedule_new_missile(rwr_schedule_t *schedule);
-
 /// Start running the given schedule, dispatching events to the RWR
 void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr);
 

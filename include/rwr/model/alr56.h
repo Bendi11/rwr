@@ -113,3 +113,6 @@ void alr56_drop_lock(alr56_t *rwr, contact_id_t contact);
 
 /// Free memory allocated for this model, does not free the tone player passed to the `alr56_new` function
 void alr56_free(alr56_t *rwr);
+
+/// Get a pointer to the given contact represented by ID, either from the forgotten list or the active contacts list
+contact_t* alr56_lookup_contact(alr56_t *rwr, const contact_id_t contact);

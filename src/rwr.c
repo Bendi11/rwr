@@ -4,7 +4,7 @@
 #include <math.h>
 #include <string.h>
 
-static contact_id_t counter = 0;
+static contact_id_t counter = INVALID_CONTACT_ID + 1;
 
 void contact_new(contact_t *contact, const source_t *source, location_t loc, contact_status_t status) {
     *contact = (contact_t){

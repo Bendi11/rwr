@@ -31,10 +31,6 @@ fired_missile_t* alr56_missile_impl(alr56_t *rwr, contact_t *contact);
 /// Drop the given RWR contact's lock if gained
 void alr56_drop_lock_impl(alr56_t *rwr, contact_t *contact);
 
-
-/// Get a pointer to the given contact represented by ID, either from the forgotten list or the active contacts list
-contact_t* alr56_lookup_contact(alr56_t *rwr, const contact_id_t contact);
-
 /// SDL timer callback to periodically update the RWR display, dropping contacts if no pings were received
 unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
 

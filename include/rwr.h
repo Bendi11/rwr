@@ -32,6 +32,8 @@ typedef uint8_t contact_status_t;
 /// Unique identifier for every `contact_t`, used to differentiate contacts that have been moved in memory
 typedef uint16_t contact_id_t;
 
+#define INVALID_CONTACT_ID ((uint16_t)0)
+
 /// An RWR contact including radar emitter and location data
 typedef struct contact {
     contact_status_t status;
