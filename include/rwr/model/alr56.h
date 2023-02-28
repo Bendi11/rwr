@@ -91,27 +91,25 @@ alr56_t* alr56_new(tone_player_t *player);
 /// Attempt to create a new RWR that has painted the aircraft with search radar
 ///
 /// Returns NULL if the RWR has reached the maximum number of contacts
-contact_t* alr56_newguy(alr56_t *rwr, const source_t *source, location_t location);
+contact_id_t alr56_newguy(alr56_t *rwr, const source_t *source, location_t location);
 
 /// Check if the given contact has been forgotten by the RWR because it has not been pinged
-bool alr56_contact_forgotten(alr56_t *rwr, const contact_t *contact);
+bool alr56_contact_forgotten(alr56_t *rwr, const contact_id_t contact);
 
 /// Paint the RWR receiver with radar, updating the position on the display
-///
-/// Returns a pointer to the new contact location if the contact has been moved to the forgotten buffer
-contact_t* alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc);
+void alr56_ping(alr56_t *rwr, contact_id_t contact, location_t loc);
 
 /// Drop the given contact from the RWR, freeing the memory allocated for the contact
-void alr56_drop(alr56_t *rwr, contact_t *contact);
+void alr56_drop(alr56_t *rwr, contact_id_t contact);
 
 /// Upgrade the given contact to an STT lock
-void alr56_lock(alr56_t *rwr, contact_t *contact);
+void alr56_lock(alr56_t *rwr, contact_id_t contact);
 
 /// Launch a missile from the given target
-fired_missile_t* alr56_missile(alr56_t *rwr, contact_t *contact);
+fired_missile_t* alr56_missile(alr56_t *rwr, contact_id_t contact);
 
-/// Drop the given RWR contact, breaking lock if gained
-void alr56_drop_lock(alr56_t *rwr, contact_t *contact);
+/// Drop the given RWR contact's lock if gained
+void alr56_drop_lock(alr56_t *rwr, contact_id_t contact);
 
 /// Free memory allocated for this model, does not free the tone player passed to the `alr56_new` function
 void alr56_free(alr56_t *rwr);

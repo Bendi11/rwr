@@ -30,5 +30,8 @@ typedef struct rwr_schedule {
     } run;
 } rwr_schedule_t;
 
+/// Used to sort the events list by the time the event occurs
+int rwr_schedule_cmp_events(const void *v1, const void *v2);
+
 /// Double the capacity of the events buffer
 void rwr_schedule_expand_events(rwr_schedule_t *schedule);

@@ -51,6 +51,8 @@ int main(int argc, char *argv[]) {
     SDL_SetWindowTitle(window, "RWR");
     SDL_Event event;
     bool run = true;
+
+    rwr_schedule_run(schedule, rwr);
     while(run) {
         SDL_RenderClear(render);
         alr56_render_scope(rwr, render);
@@ -66,7 +68,7 @@ int main(int argc, char *argv[]) {
         SDL_Delay(60);
     }
 
-    rwr_schedule_free(&schedule);
+    rwr_schedule_free(schedule);
     alr56_free(rwr);
         
     SDL_DestroyWindow(window);

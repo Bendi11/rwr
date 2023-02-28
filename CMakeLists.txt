@@ -35,6 +35,7 @@ set(
     "src/sources.c"
     "src/tones.c"
     "src/model/alr56/alr56.c"
+    "src/model/alr56/alr56_impl.c"
     "src/model/alr56/tones.c"
     "src/model/alr56/render.c"
     "src/schedule/schedule.c"

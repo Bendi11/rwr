@@ -36,13 +36,13 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
 
             schedule->run.contacts[ev->contact] = alr56_newguy(
                 schedule->run.rwr,
-                ev->newguy.source,
+                &SOURCES[ev->newguy.source],
                 ev->newguy.loc
             );
         } break;
 
         case RWR_SCHEDULE_EVENT_PAINT: {
-            schedule->run.contacts[ev->contact] = alr56_ping(
+            schedule->run.contacts[ev->contact] = alr56_ping_impl(
                 schedule->run.rwr,
                 schedule->run.contacts[ev->contact],
                 ev->paint.loc
@@ -50,8 +50,12 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
         } break;
 
         case RWR_SCHEDULE_EVENT_DROP: {
-            alr56_drop(schedule->run.rwr, schedule->run.contacts[ev->contact]);
+            alr56_drop_impl(schedule->run.rwr, schedule->run.contacts[ev->contact]);
             schedule->run.contacts[ev->contact] = NULL;
+        } break;
+
+        case RWR_SCHEDULE_EVENT_DROP_LOCK: {
+            alr56_drop_lock_impl(schedule->run.rwr, schedule->run.contacts[ev->contact]);
         }
     }
 
@@ -62,7 +66,16 @@ void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr) {
     rwr_schedule_stop(schedule);
     schedule->run.rwr = rwr;
     schedule->run.event = 0;
-     
+    schedule->run.contacts = calloc(schedule->contacts, sizeof(contact_t*));
+    schedule->run.missiles = calloc(schedule->missiles, sizeof(fired_missile_t*));
+    qsort(
+        schedule->events.array,
+        schedule->events.len,
+        sizeof(*schedule->events.array),
+        rwr_schedule_cmp_events
+    );
+
+    schedule->run.timer = SDL_AddTimer(1, rwr_schedule_timer_cb, schedule);
 }
 
 void rwr_schedule_stop(rwr_schedule_t *schedule) {
@@ -91,4 +104,11 @@ void rwr_schedule_expand_events(rwr_schedule_t *schedule) {
         schedule->events.cap,
         sizeof(*schedule->events.array)
     );
+}
+
+int rwr_schedule_cmp_events(const void *v1, const void *v2) {
+    const rwr_schedule_event_t *e1 = v1;
+    const rwr_schedule_event_t *e2 = v2;
+
+    return (int)e1->time_ms - (int)e2->time_ms;
 }

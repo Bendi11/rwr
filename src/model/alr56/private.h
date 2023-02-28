@@ -12,6 +12,29 @@ enum {
 #define ALR56_UPDATE_INTERVAL_MS (1000)
 #define ALR56_MISSILE_RECYCLE_INTERVAL_MS (15000)
 
+
+/// Check if the given contact has been forgotten by the RWR because it has not been pinged
+bool alr56_contact_forgotten_impl(alr56_t *rwr, const contact_t *contact);
+
+/// Paint the RWR receiver with radar, updating the position on the display
+contact_t* alr56_ping_impl(alr56_t *rwr, contact_t *contact, location_t loc);
+
+/// Drop the given contact from the RWR, freeing the memory allocated for the contact
+void alr56_drop_impl(alr56_t *rwr, contact_t *contact);
+
+/// Upgrade the given contact to an STT lock
+void alr56_lock_impl(alr56_t *rwr, contact_t *contact);
+
+/// Launch a missile from the given target
+fired_missile_t* alr56_missile_impl(alr56_t *rwr, contact_t *contact);
+
+/// Drop the given RWR contact's lock if gained
+void alr56_drop_lock_impl(alr56_t *rwr, contact_t *contact);
+
+
+/// Get a pointer to the given contact represented by ID, either from the forgotten list or the active contacts list
+contact_t* alr56_lookup_contact(alr56_t *rwr, const contact_id_t contact);
+
 /// SDL timer callback to periodically update the RWR display, dropping contacts if no pings were received
 unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
 
@@ -19,7 +42,7 @@ unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
 void alr56_blink_timer_set(alr56_blink_common_t *blink);
 
 /// Move the given contact to the forgotten list
-contact_t* alr56_forget_contact(alr56_t *rwr, contact_t *contact);
+contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact);
 
 /// Move the given contact from the forgotten list to the active contacts list, if there is an empty spot on the contacts list
 contact_t* alr56_remember_contact(alr56_t *rwr, contact_t *contact);

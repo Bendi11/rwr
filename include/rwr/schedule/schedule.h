@@ -21,14 +21,14 @@ typedef uint16_t rwr_scheduled_missile_t;
 
 /// An event that is scheduled to happen at a specific time in an `rwr_schedule_t`
 typedef struct rwr_schedule_event {
-    rwr_schedule_event_tag_t tag;
     rwr_scheduled_contact_t contact;
+    rwr_schedule_event_tag_t tag;
     uint32_t time_ms;
 
     union {
         struct {
             location_t loc;
-            const source_t *source;
+            source_idx_t source;
         } newguy;
 
         struct {

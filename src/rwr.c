@@ -4,8 +4,11 @@
 #include <math.h>
 #include <string.h>
 
+static contact_id_t counter = 0;
+
 void contact_new(contact_t *contact, const source_t *source, location_t loc, contact_status_t status) {
     *contact = (contact_t){
+        .id = counter++,
         .location = loc,
         .status = status,
         .search = {

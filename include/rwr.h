@@ -29,11 +29,15 @@ enum {
 
 typedef uint8_t contact_status_t;
 
+/// Unique identifier for every `contact_t`, used to differentiate contacts that have been moved in memory
+typedef uint16_t contact_id_t;
+
 /// An RWR contact including radar emitter and location data
 typedef struct contact {
-    const source_t *source;
-    location_t location;
     contact_status_t status;
+    contact_id_t id;
+    location_t location;
+    const source_t *source;
     union {
         /// Additional state for an RWR contact that has painted the aircraft with a search radar
         struct contact_search {
