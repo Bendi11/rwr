@@ -151,6 +151,11 @@ void alr56_drop_lock(alr56_t *rwr, contact_t *contact) {
 void alr56_drop(alr56_t *rwr, contact_t *contact) {
     alr56_drop_lock(rwr, contact);
     contact_delete(*contact);
+
+    if(alr56_contact_forgotten(rwr, contact)) {
+        alr56_remove_forgotten(rwr, contact);
+        return;
+    }
     contact->source = NULL;
 
     if(rwr->priority.contact == contact) {
@@ -162,11 +167,14 @@ void alr56_drop(alr56_t *rwr, contact_t *contact) {
     }
 }
 
-void alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc) {
+contact_t* alr56_ping(alr56_t *rwr, contact_t *contact, location_t loc) {
+    contact = alr56_remember_contact(rwr, contact);
     contact->location = loc;
     if(contact->status == CONTACT_SEARCH) {
         contact->search.last_ping = SDL_GetTicks64();
     }
+
+    return contact;
 }
 
 void alr56_lock(alr56_t *rwr, contact_t *contact) {
@@ -221,6 +229,11 @@ void alr56_free(alr56_t *rwr) {
         contact_delete(rwr->contacts[i]);
     }
 
+    while(rwr->forgotten != NULL) {
+        contact_delete(rwr->forgotten->contact);
+        alr56_remove_forgotten(rwr, &rwr->forgotten->contact);
+    }
+
     free(rwr);
 }
 
@@ -254,7 +267,7 @@ unsigned int alr56_periodic_cb(unsigned int _, void *vrwr) {
             contact->status == CONTACT_SEARCH &&
             time - contact->search.last_ping >= ALR56_MS_BEFORE_DROP
         ) {
-            alr56_drop(rwr, contact);
+            alr56_forget_contact(rwr, contact);
         }
     }
     return ALR56_UPDATE_INTERVAL_MS;
@@ -271,6 +284,10 @@ contact_t* alr56_forget_contact(alr56_t *rwr, contact_t *contact) {
     forgotten->contact = *contact;
     forgotten->next = NULL;
     contact->source = NULL;
+
+    if(rwr->priority.contact == contact) {
+        alr56_recompute_priority(rwr);
+    }
 
     if(rwr->forgotten == NULL) {
         rwr->forgotten = forgotten;
@@ -297,6 +314,12 @@ contact_t *alr56_remember_contact(alr56_t *rwr, contact_t *contact) {
     if(empty_slot == NULL) { return contact; }
     
     *empty_slot = *contact;
+    alr56_remove_forgotten(rwr, contact);
+    
+    return empty_slot;
+}
+
+void alr56_remove_forgotten(alr56_t *rwr, contact_t *contact) {
     if(&rwr->forgotten->contact == contact) {
         struct alr56_forgotten_link *tmp = rwr->forgotten;
         rwr->forgotten = rwr->forgotten->next;

@@ -48,6 +48,11 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
                 ev->paint.loc
             );
         } break;
+
+        case RWR_SCHEDULE_EVENT_DROP: {
+            alr56_drop(schedule->run.rwr, schedule->run.contacts[ev->contact]);
+            schedule->run.contacts[ev->contact] = NULL;
+        }
     }
 
     return schedule->events.array[schedule->run.event].time_ms - schedule->run.time;

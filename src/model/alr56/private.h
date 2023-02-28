@@ -24,6 +24,9 @@ contact_t* alr56_forget_contact(alr56_t *rwr, contact_t *contact);
 /// Move the given contact from the forgotten list to the active contacts list, if there is an empty spot on the contacts list
 contact_t* alr56_remember_contact(alr56_t *rwr, contact_t *contact);
 
+/// Remove a contact from the forgotten contacts list
+void alr56_remove_forgotten(alr56_t *rwr, contact_t *contact);
+
 /// Clear the current priority target
 void alr56_clear_priority(alr56_t *rwr);
 
