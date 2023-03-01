@@ -4,6 +4,8 @@
 #include <rwr/schedule/builder.h>
 #include <stdlib.h>
 
+#define S_TO_MS(time) (uint32_t)((float)(time) * 1000.f)
+
 /// A schedule of events that happen to an RWR on a given timespan
 typedef struct rwr_schedule {
     /// Dynamic array of events, unsorted until the schedule runs
@@ -32,7 +34,13 @@ typedef struct rwr_schedule {
 } rwr_schedule_t;
 
 typedef struct rwr_encounter_builder {
+    rwr_schedule_t *schedule;
+    rwr_scheduled_contact_t contact;
+    /// The contact's current location
+    location_t location;
     
+    /// Current time offset to scedule events at
+    uint32_t t_offset;
 } rwr_encounter_builder_t;
 
 /// Used to sort the events list by the time the event occurs

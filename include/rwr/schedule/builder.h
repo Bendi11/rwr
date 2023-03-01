@@ -20,6 +20,9 @@ typedef struct rand_location {
     rand_range_t distance;
 } rand_location_t;
 
+/// Create a new encounter builder that schedules actions on the given schedule
+rwr_encounter_builder_t* rwr_schedule_encounter(rwr_schedule_t *schedule, location_t loc, source_idx_t source);
+
 /// Delay a given timespan without scheduling anything more
 void rwr_encounter_delay(rwr_encounter_builder_t *builder, float seconds);
 
