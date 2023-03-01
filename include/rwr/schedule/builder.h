@@ -21,7 +21,7 @@ typedef struct rand_location {
 } rand_location_t;
 
 /// Create a new encounter builder that schedules actions on the given schedule
-rwr_encounter_builder_t* rwr_schedule_encounter(rwr_schedule_t *schedule, location_t loc, source_idx_t source);
+rwr_encounter_builder_t* rwr_schedule_encounter(rwr_schedule_t *schedule, float time, location_t loc, source_idx_t source);
 
 /// Delay a given timespan without scheduling anything more
 void rwr_encounter_delay(rwr_encounter_builder_t *builder, float seconds);
@@ -55,3 +55,6 @@ void rwr_encounter_drop_missile(rwr_encounter_builder_t *builder, rwr_scheduled_
 
 /// Update the fired missile's position on the RWR display
 void rwr_encounter_ping_missile(rwr_encounter_builder_t *builder, rwr_scheduled_missile_t missile, location_t loc);
+
+/// Complete the encounter by dropping the contact and any fired missiles
+void rwr_encounter_complete(rwr_encounter_builder_t *builder);

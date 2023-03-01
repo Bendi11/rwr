@@ -66,7 +66,6 @@ contact_id_t alr56_newguy(alr56_t *rwr, const source_t *source, location_t locat
     return contact->id;
 }
 
-
 /// Check if the given contact has been forgotten by the RWR because it has not been pinged
 bool alr56_contact_forgotten(alr56_t *rwr, const contact_id_t contact) {
     return alr56_contact_forgotten_impl(rwr, alr56_lookup_contact(rwr, contact));

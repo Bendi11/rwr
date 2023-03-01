@@ -41,6 +41,8 @@ typedef struct rwr_encounter_builder {
     
     /// Current time offset to scedule events at
     uint32_t t_offset;
+
+    uint32_t max_time;
 } rwr_encounter_builder_t;
 
 /// Used to sort the events list by the time the event occurs

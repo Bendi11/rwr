@@ -3,6 +3,7 @@
 #include "rwr.h"
 #include "rwr/model/alr56.h"
 #include "rwr/model/alr56/render.h"
+#include "rwr/schedule/builder.h"
 #include "rwr/schedule/schedule.h"
 #include "rwr/tones.h"
 #include <SDL2/SDL.h>
@@ -11,6 +12,7 @@
 #include <SDL_timer.h>
 #include <SDL_ttf.h>
 #include <SDL_video.h>
+#include <time.h>
 
 void test_cb(void *userdat, uint8_t *buf, int len) {
     tone_player_t *player = userdat;
@@ -20,6 +22,7 @@ void test_cb(void *userdat, uint8_t *buf, int len) {
 }
 
 int main(int argc, char *argv[]) {
+    srand(0);
     if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return -1;
@@ -51,6 +54,22 @@ int main(int argc, char *argv[]) {
     SDL_SetWindowTitle(window, "RWR");
     SDL_Event event;
     bool run = true;
+
+    rwr_encounter_builder_t *ec = rwr_schedule_encounter(schedule, 0.f, (location_t){500.f, 1000.f, 0.14f}, SOURCE_F16);
+
+    rwr_encounter_paint_periodic(ec, (rand_range_t){.min = 1.f, .max = 3.f}, 15.f);
+    rwr_encounter_move_periodic(
+        ec,
+        (rand_range_t){1.f, 1.f},
+        15.f,
+        (rand_location_t){
+            .altitude = {-20.f, 20.f},
+            .bearing = {-2.f, 2.f},
+            .distance = {-0.2f, 0.2f}
+        }
+    );
+
+    rwr_encounter_complete(ec);
 
     rwr_schedule_run(schedule, rwr);
     while(run) {

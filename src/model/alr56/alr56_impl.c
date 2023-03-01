@@ -211,7 +211,7 @@ bool alr56_contact_forgotten_impl(alr56_t *rwr, const contact_t *contact) {
     return contact < rwr->contacts && (contact > (rwr->contacts + ALR56_MAX_CONTACTS));
 }
 
-contact_t* alr56_forget_contact(alr56_t *rwr, contact_t *contact) {
+contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact) {
     if(alr56_contact_forgotten_impl(rwr, contact)) { return contact; }
 
     struct alr56_forgotten_link *forgotten = malloc(sizeof(*forgotten));
@@ -287,5 +287,5 @@ contact_t* alr56_lookup_contact(alr56_t *rwr, const contact_id_t id) {
     }
 
     fputs("alr56_lookup_contact called with invalid ID", stderr);
-    return NULL;
+    exit(-1);
 }

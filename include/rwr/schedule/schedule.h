@@ -6,6 +6,7 @@
 enum {
     RWR_SCHEDULE_EVENT_NEWGUY,
     RWR_SCHEDULE_EVENT_PAINT,
+    RWR_SCHEDULE_EVENT_MOVE,
     RWR_SCHEDULE_EVENT_LOCK,
     RWR_SCHEDULE_EVENT_DROP_LOCK,
     RWR_SCHEDULE_EVENT_DROP,
@@ -34,6 +35,10 @@ typedef struct rwr_schedule_event {
         struct {
             location_t loc;
         } paint;
+
+        struct {
+            location_t loc;
+        } move;
         
         struct {} lock;
         struct {} drop_lock;

@@ -28,6 +28,7 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
     schedule->run.event += 1;
     schedule->run.time += time;
     
+    printf("TAG: %u\n", ev->tag);
     switch(ev->tag) {
         case RWR_SCHEDULE_EVENT_NEWGUY: {
             if(schedule->run.contacts[ev->contact] != INVALID_CONTACT_ID) {
@@ -73,8 +74,11 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
             contact_remove_missile(contact, missile);
         } break;
     }
-
-    return schedule->events.array[schedule->run.event].time_ms - schedule->run.time;
+    
+    uint32_t next = schedule->events.array[schedule->run.event].time_ms - (uint32_t)schedule->run.time;
+    printf("%u more events\n", next);
+    next = next == 0 ? 1 : next;
+    return next;
 }
 
 void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr) {
@@ -90,17 +94,21 @@ void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr) {
         rwr_schedule_cmp_events
     );
 
+    for(size_t i = 0; i < schedule->events.len; ++i) {
+        printf("time: %u\n", schedule->events.array[i].time_ms);
+    }
+    
+    schedule->run.time = 0;
     schedule->run.timer = SDL_AddTimer(1, rwr_schedule_timer_cb, schedule);
 }
 
 void rwr_schedule_stop(rwr_schedule_t *schedule) {
-    if(schedule->run.rwr != NULL) { return; }
+    if(schedule->run.rwr == NULL) { return; }
     
     SDL_RemoveTimer(schedule->run.timer);
     schedule->run.rwr = NULL;
-    for(size_t i = 0; i < schedule->events.len; ++i) {
-    
-    }
+    free(schedule->run.contacts);
+    free(schedule->run.missiles);
 }
 
 void rwr_schedule_add_event(rwr_schedule_t *schedule, rwr_schedule_event_t event) {
@@ -126,4 +134,11 @@ int rwr_schedule_cmp_events(const void *v1, const void *v2) {
     const rwr_schedule_event_t *e2 = v2;
 
     return (int)e1->time_ms - (int)e2->time_ms;
+}
+
+void rwr_schedule_free(rwr_schedule_t *schedule) {
+    rwr_schedule_stop(schedule);
+
+    free(schedule->events.array);
+    free(schedule);
 }
