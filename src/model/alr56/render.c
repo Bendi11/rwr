@@ -57,6 +57,8 @@ void alr56_render_scope(alr56_t *rwr, SDL_Renderer *render) {
     dest.h = (int)icon_h;
     dest.w = (int)icon_w;
 
+    uint8_t alpha_mod = (uint8_t)(rwr->twa.dim * 255.f);
+
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         contact_t *contact = &rwr->contacts[i];
         if(contact->status == CONTACT_SEARCH && !rwr->twa.search) { continue; }
@@ -73,6 +75,7 @@ void alr56_render_scope(alr56_t *rwr, SDL_Renderer *render) {
             dest.x = (int)x;
             dest.y = (int)y;
 
+            SDL_SetTextureAlphaMod(icons[contact->source->id], alpha_mod);
             SDL_RenderCopy(render, icons[contact->source->id], NULL, &dest);
         }
     }
@@ -111,6 +114,7 @@ static void init_icons(SDL_Renderer *r) {
         SDL_Texture *tx = SDL_CreateTextureFromSurface(r, txt_surface);
         SDL_FreeSurface(txt_surface);
         SDL_SetTextureAlphaMod(tx, 255);
+
 
         if(src->location == RADAR_SOURCE_AIR) {
             SDL_Rect dest = {

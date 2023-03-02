@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
     SDL_PauseAudioDevice(id, 0);
     
     alr56_t *rwr = alr56_new(player);
+    rwr->twa.dim = 0.9f;
     rwr_schedule_t *schedule = rwr_schedule_new();
 
     SDL_Window *window = NULL;
