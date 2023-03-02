@@ -39,16 +39,19 @@ contact_id_t alr56_newguy(alr56_t *rwr, const source_t *source, location_t locat
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         if(rwr->contacts[i].source == NULL) {
             contact = &rwr->contacts[i];
+            contact_new(contact, source, location, CONTACT_SEARCH);
             break;
         }
     }
 
     if(contact == NULL) {
-        contact = malloc(sizeof(*contact));
-        alr56_forget_contact_impl(rwr, contact);
+        contact_t *tmp = malloc(sizeof(*contact));
+        contact_new(tmp, source, location, CONTACT_SEARCH);
+        contact = alr56_forget_contact_impl(rwr, tmp, true);
+        free(tmp);
     }
 
-    contact_new(contact, source, location, CONTACT_SEARCH);
+    contact_id_t id = contact->id;
 
     if(!alr56_contact_forgotten_impl(rwr, contact)) {
         alr56_newguy_impl(rwr, contact);

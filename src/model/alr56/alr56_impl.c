@@ -220,18 +220,18 @@ unsigned int alr56_periodic_cb(unsigned int _, void *vrwr) {
             contact->status == CONTACT_SEARCH &&
             time - contact->search.last_ping >= ALR56_MS_BEFORE_DROP
         ) {
-            alr56_forget_contact_impl(rwr, contact);
+            alr56_forget_contact_impl(rwr, contact, false);
         }
     }
     return ALR56_UPDATE_INTERVAL_MS;
 }
 
 bool alr56_contact_forgotten_impl(alr56_t *rwr, const contact_t *contact) {
-    return contact < rwr->contacts && (contact > (rwr->contacts + ALR56_MAX_CONTACTS));
+    return contact < rwr->contacts || (contact > (rwr->contacts + ALR56_MAX_CONTACTS));
 }
 
-contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact) {
-    if(alr56_contact_forgotten_impl(rwr, contact)) { return contact; }
+contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact, bool force) {
+    if(!force && alr56_contact_forgotten_impl(rwr, contact)) { return contact; }
 
     struct alr56_forgotten_link *forgotten = malloc(sizeof(*forgotten));
     forgotten->contact = *contact;
@@ -254,7 +254,7 @@ contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact) {
 }
 
 contact_t *alr56_remember_contact(alr56_t *rwr, contact_t *contact) {
-    if(alr56_contact_forgotten_impl(rwr, contact) || rwr->forgotten == NULL) { return contact; }
+    if(!alr56_contact_forgotten_impl(rwr, contact) || rwr->forgotten == NULL) { return contact; }
 
     contact_t *empty_slot = NULL;
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
@@ -305,6 +305,6 @@ contact_t* alr56_lookup_contact(alr56_t *rwr, const contact_id_t id) {
         node = node->next;
     }
 
-    fputs("alr56_lookup_contact called with invalid ID", stderr);
+    fprintf(stderr, "alr56_lookup_contact called with invalid ID %u\n", id);
     exit(-1);
 }

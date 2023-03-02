@@ -12,6 +12,7 @@
 #include <SDL_timer.h>
 #include <SDL_ttf.h>
 #include <SDL_video.h>
+#include <math.h>
 #include <time.h>
 
 void test_cb(void *userdat, uint8_t *buf, int len) {
@@ -56,32 +57,41 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     bool run = true;
 
+    for(uint8_t i = 0; i < 17; ++i) {
+
     rwr_encounter_builder_t *ec = rwr_schedule_encounter(
         schedule,
         0.f,
-        (location_t){
-            .distance = 15.f,
-            .altitude = 1000.f,
-            .bearing = 0.14f
-        },
+        rwr_encounter_rand_location(
+            (rand_location_t){
+                .altitude = {500.f, 20000.f},
+                .bearing = {-M_PI, M_PI},
+                .distance = {1.f, 40.f}
+            }
+        ),
         SOURCE_F16
     );
 
     rwr_encounter_paint_periodic(
         ec,
         (rand_range_t){
-            .min = 1.f,
-            .max = 3.f
+            .min = 5.f,
+            .max = 6.f
         },
         (rand_location_t){
             .altitude = {-20.f, 20.f},
             .bearing = {-0.1f, .1f},
             .distance = {-0.2f, 0.2f}
         },
-        15.f
+        i == 16 ? 30.f : 15.f
     );
+    
+    rwr_encounter_delay(ec, 5.4f);
+    rwr_encounter_missile(ec);
 
     rwr_encounter_complete(ec);
+
+    }
 
     rwr_schedule_run(schedule, rwr);
     while(run && rwr_schedule_running(schedule)) {

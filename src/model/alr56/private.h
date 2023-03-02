@@ -40,7 +40,7 @@ unsigned int alr56_periodic_cb(unsigned int _, void *rwr);
 void alr56_blink_timer_set(alr56_blink_common_t *blink);
 
 /// Move the given contact to the forgotten list
-contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact);
+contact_t* alr56_forget_contact_impl(alr56_t *rwr, contact_t *contact, bool force);
 
 /// Move the given contact from the forgotten list to the active contacts list, if there is an empty spot on the contacts list
 contact_t* alr56_remember_contact(alr56_t *rwr, contact_t *contact);
