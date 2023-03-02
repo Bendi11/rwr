@@ -27,19 +27,10 @@ rwr_encounter_builder_t* rwr_schedule_encounter(rwr_schedule_t *schedule, float 
 void rwr_encounter_delay(rwr_encounter_builder_t *builder, float seconds);
 
 /// Paint the radar receiver, updating the position on the display and remembering the contact if it was forgotten
-void rwr_encounter_paint(rwr_encounter_builder_t *builder);
+void rwr_encounter_paint(rwr_encounter_builder_t *builder, location_t diff);
 
 /// For the next `time` seconds, send a radar ping at the current location every `ping_interval` seconds
-void rwr_encounter_paint_periodic(rwr_encounter_builder_t *builder, rand_range_t ping_interval, float time);
-
-/// Move the contact to the given location onscreen
-void rwr_encounter_move_abs(rwr_encounter_builder_t *builder, location_t loc);
-
-/// Move the contact `diff` units away from its current position
-void rwr_encounter_move(rwr_encounter_builder_t *builder, location_t diff);
-
-/// Move the contact `diff` units away from its position every `interval` seconds for the next `time` seconds
-void rwr_encounter_move_periodic(rwr_encounter_builder_t *builder, rand_range_t interval, float time, rand_location_t diff);
+void rwr_encounter_paint_periodic(rwr_encounter_builder_t *builder, rand_range_t ping_interval, rand_location_t movement, float time);
 
 /// Generate a random location using the given parameters
 location_t rwr_encounter_rand_location(rand_location_t loc);

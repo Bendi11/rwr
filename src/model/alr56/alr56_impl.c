@@ -45,7 +45,7 @@ uint16_t alr56_get_threat(alr56_t *rwr, const contact_t *source) {
 }
 
 contact_t* alr56_find_priority(alr56_t *rwr) {
-    contact_t *highest;
+    contact_t *highest = NULL;
     uint16_t threat = 0;
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         if(rwr->contacts[i].source != NULL) {

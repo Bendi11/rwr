@@ -36,12 +36,9 @@ typedef struct rwr_schedule {
 typedef struct rwr_encounter_builder {
     rwr_schedule_t *schedule;
     rwr_scheduled_contact_t contact;
-    /// The contact's current location
-    location_t location;
     
     /// Current time offset to scedule events at
     uint32_t t_offset;
-
     uint32_t max_time;
 } rwr_encounter_builder_t;
 

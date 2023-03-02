@@ -55,18 +55,29 @@ int main(int argc, char *argv[]) {
     SDL_Event event;
     bool run = true;
 
-    rwr_encounter_builder_t *ec = rwr_schedule_encounter(schedule, 0.f, (location_t){500.f, 1000.f, 0.14f}, SOURCE_F16);
+    rwr_encounter_builder_t *ec = rwr_schedule_encounter(
+        schedule,
+        0.f,
+        (location_t){
+            .distance = 15.f,
+            .altitude = 1000.f,
+            .bearing = 0.14f
+        },
+        SOURCE_F16
+    );
 
-    rwr_encounter_paint_periodic(ec, (rand_range_t){.min = 1.f, .max = 3.f}, 15.f);
-    rwr_encounter_move_periodic(
+    rwr_encounter_paint_periodic(
         ec,
-        (rand_range_t){1.f, 1.f},
-        15.f,
+        (rand_range_t){
+            .min = 1.f,
+            .max = 3.f
+        },
         (rand_location_t){
             .altitude = {-20.f, 20.f},
-            .bearing = {-2.f, 2.f},
+            .bearing = {-0.1f, .1f},
             .distance = {-0.2f, 0.2f}
-        }
+        },
+        15.f
     );
 
     rwr_encounter_complete(ec);

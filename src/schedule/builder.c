@@ -6,7 +6,6 @@
 rwr_encounter_builder_t* rwr_schedule_encounter(rwr_schedule_t *schedule, float time, location_t loc, source_idx_t source) {
     rwr_encounter_builder_t *builder = malloc(sizeof(*builder));
     builder->schedule = schedule;
-    builder->location = loc;
     builder->t_offset = S_TO_MS(time);
     builder->contact = rwr_schedule_new_contact(schedule);
 
@@ -17,8 +16,8 @@ rwr_encounter_builder_t* rwr_schedule_encounter(rwr_schedule_t *schedule, float 
             .contact = builder->contact,
             .time_ms = builder->t_offset,
             .newguy = {
-                .loc = builder->location,
                 .source = source,
+                .loc = loc,
             }
         }
     );
@@ -33,7 +32,7 @@ void rwr_encounter_delay(rwr_encounter_builder_t *builder, float seconds) {
     builder->max_time = builder->t_offset > builder->max_time ? builder->t_offset : builder->max_time;
 }
 
-void rwr_encounter_paint(rwr_encounter_builder_t *builder) {
+void rwr_encounter_paint(rwr_encounter_builder_t *builder, location_t diff) {
     rwr_schedule_add_event(
         builder->schedule,
         (rwr_schedule_event_t) {
@@ -41,41 +40,19 @@ void rwr_encounter_paint(rwr_encounter_builder_t *builder) {
             .contact = builder->contact,
             .time_ms = builder->t_offset,
             .paint = {
-                .loc = builder->location,
-                
+                .loc_diff = diff 
             }
         }
     );
 }
 
-void rwr_encounter_paint_periodic(rwr_encounter_builder_t *builder, rand_range_t ping_interval, float time) {
+void rwr_encounter_paint_periodic(rwr_encounter_builder_t *builder, rand_range_t ping_interval, rand_location_t movement, float time) {
     uint32_t end_time = builder->t_offset + S_TO_MS(time);
     uint32_t t = builder->t_offset;
     while(builder->t_offset < end_time) {
         float delay = rwr_encounter_rand(ping_interval);
         rwr_encounter_delay(builder, delay);
-        rwr_encounter_paint(builder);
-    }
-    builder->t_offset = t;
-}
-
-void rwr_encounter_move_abs(rwr_encounter_builder_t *builder, location_t loc) {
-    builder->location = loc;
-}
-
-void rwr_encounter_move(rwr_encounter_builder_t *builder, location_t diff) {
-    builder->location.altitude += diff.altitude;
-    builder->location.bearing += diff.bearing;
-    builder->location.distance += diff.distance;
-}
-
-void rwr_encounter_move_periodic(rwr_encounter_builder_t *builder, rand_range_t interval, float time, rand_location_t diff) {
-    uint32_t end_time = builder->t_offset + S_TO_MS(time);
-    uint32_t t = builder->t_offset;
-    while(builder->t_offset < end_time) {
-        float delay = rwr_encounter_rand(interval);
-        rwr_encounter_delay(builder, delay);
-        rwr_encounter_move(builder, rwr_encounter_rand_location(diff));
+        rwr_encounter_paint(builder, rwr_encounter_rand_location(movement));
     }
     builder->t_offset = t;
 }
