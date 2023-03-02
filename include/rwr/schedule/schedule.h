@@ -62,6 +62,9 @@ rwr_schedule_t *rwr_schedule_new(void);
 /// Start running the given schedule, dispatching events to the RWR
 void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr);
 
+/// Check if the given RWR schedule is currently running on a separate timer thread
+bool rwr_schedule_running(rwr_schedule_t *schedule);
+
 /// Stop running the given schedule
 void rwr_schedule_stop(rwr_schedule_t *schedule);
 

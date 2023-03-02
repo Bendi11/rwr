@@ -79,7 +79,10 @@ unsigned int rwr_schedule_timer_cb(unsigned int time, void *vparam) {
     }
     
     schedule->run.event += 1;
-    if(schedule->run.event >= schedule->events.len) { return 0; }
+    if(schedule->run.event >= schedule->events.len) {
+        rwr_schedule_free_run(schedule);
+        return 0;
+    }
     uint32_t next = schedule->events.array[schedule->run.event].time_ms - (uint32_t)schedule->run.time;
     next = next == 0 ? 1 : next;
     return next;
@@ -102,10 +105,18 @@ void rwr_schedule_run(rwr_schedule_t *schedule, alr56_t *rwr) {
     schedule->run.timer = SDL_AddTimer(1, rwr_schedule_timer_cb, schedule);
 }
 
+bool rwr_schedule_running(rwr_schedule_t *schedule) {
+    return schedule->run.rwr != NULL;
+}
+
 void rwr_schedule_stop(rwr_schedule_t *schedule) {
     if(schedule->run.rwr == NULL) { return; }
     
     SDL_RemoveTimer(schedule->run.timer);
+    rwr_schedule_free_run(schedule);
+}
+
+void rwr_schedule_free_run(rwr_schedule_t *schedule) {
     schedule->run.rwr = NULL;
     free(schedule->run.contacts);
     free(schedule->run.missiles);

@@ -42,6 +42,9 @@ typedef struct rwr_encounter_builder {
     uint32_t max_time;
 } rwr_encounter_builder_t;
 
+/// Free any data allocated for the running state of a schedule, without cancelling any timers
+void rwr_schedule_free_run(rwr_schedule_t *schedule);
+
 /// Used to sort the events list by the time the event occurs
 int rwr_schedule_cmp_events(const void *v1, const void *v2);
 

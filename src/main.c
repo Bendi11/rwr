@@ -22,7 +22,7 @@ void test_cb(void *userdat, uint8_t *buf, int len) {
 }
 
 int main(int argc, char *argv[]) {
-    srand(0);
+    srand(time(NULL));
     if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return -1;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
     rwr_encounter_complete(ec);
 
     rwr_schedule_run(schedule, rwr);
-    while(run) {
+    while(run && rwr_schedule_running(schedule)) {
         SDL_RenderClear(render);
         alr56_render_scope(rwr, render);
         SDL_RenderPresent(render);
