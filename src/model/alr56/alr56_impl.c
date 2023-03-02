@@ -22,6 +22,25 @@ void alr56_recompute_priority(alr56_t *rwr) {
     }
 }
 
+void alr56_newguy_impl(alr56_t *rwr, contact_t *contact) {
+    rwr->latest = contact;
+    if(rwr->twa.search) {
+        if(contact->source->location == RADAR_SOURCE_AIR) {
+            tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+            tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+        } else {
+            tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+            tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
+            tone_player_add_pri(rwr->tones, alr56_silence_tone());
+        }
+    }
+
+    alr56_recompute_priority(rwr);
+}
+
 uint16_t alr56_get_threat(alr56_t *rwr, const contact_t *source) {
     uint16_t threat = 0;
     if(source->location.distance <= source->source->lethal_range) {

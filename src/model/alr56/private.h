@@ -12,6 +12,8 @@ enum {
 #define ALR56_UPDATE_INTERVAL_MS (1000)
 #define ALR56_MISSILE_RECYCLE_INTERVAL_MS (15000)
 
+/// Sound the newguy tones and recalculate priorities if required
+void alr56_newguy_impl(alr56_t *rwr, contact_t *newguy);
 
 /// Check if the given contact has been forgotten by the RWR because it has not been pinged
 bool alr56_contact_forgotten_impl(alr56_t *rwr, const contact_t *contact);

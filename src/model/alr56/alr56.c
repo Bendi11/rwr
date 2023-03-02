@@ -39,28 +39,19 @@ contact_id_t alr56_newguy(alr56_t *rwr, const source_t *source, location_t locat
     for(uint8_t i = 0; i < ALR56_MAX_CONTACTS; ++i) {
         if(rwr->contacts[i].source == NULL) {
             contact = &rwr->contacts[i];
-            contact_new(contact, source, location, CONTACT_SEARCH);
             break;
         }
     }
 
-    if(contact != NULL) {
-        rwr->latest = contact;
-        if(rwr->twa.search) {
-            if(contact->source->location == RADAR_SOURCE_AIR) {
-                tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
-                tone_player_add_pri(rwr->tones, alr56_silence_tone());
-                tone_player_add_pri(rwr->tones, alr56_newguy_air_tone());
-                tone_player_add_pri(rwr->tones, alr56_silence_tone());
-            } else {
-                tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
-                tone_player_add_pri(rwr->tones, alr56_silence_tone());
-                tone_player_add_pri(rwr->tones, alr56_newguy_surface_tone());
-                tone_player_add_pri(rwr->tones, alr56_silence_tone());
-            }
-        }
+    if(contact == NULL) {
+        contact = malloc(sizeof(*contact));
+        alr56_forget_contact_impl(rwr, contact);
+    }
 
-        alr56_recompute_priority(rwr);
+    contact_new(contact, source, location, CONTACT_SEARCH);
+
+    if(!alr56_contact_forgotten_impl(rwr, contact)) {
+        alr56_newguy_impl(rwr, contact);
     }
 
     return contact->id;
