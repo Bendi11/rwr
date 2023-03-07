@@ -7,6 +7,9 @@
 #define S_TO_MS(time) (uint32_t)((float)(time) * 1000.f)
 
 /// A schedule of events that happen to an RWR on a given timespan
+///
+/// NOTE:
+/// Change serialization and deserialization methods when changing this structure
 typedef struct rwr_schedule {
     /// Dynamic array of events, unsorted until the schedule runs
     struct {

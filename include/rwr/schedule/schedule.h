@@ -19,6 +19,8 @@ typedef uint8_t rwr_schedule_event_tag_t;
 typedef uint16_t rwr_scheduled_contact_t;
 typedef uint16_t rwr_scheduled_missile_t;
 
+#define RWR_SCHEDULE_EVENT_UNION_SIZE (16)
+
 /// An event that is scheduled to happen at a specific time in an `rwr_schedule_t`
 typedef struct rwr_schedule_event {
     rwr_scheduled_contact_t contact;
@@ -70,3 +72,12 @@ void rwr_schedule_stop(rwr_schedule_t *schedule);
 
 /// Free all resources associated with the given schedule, killing all timers that have been started using it
 void rwr_schedule_free(rwr_schedule_t *schedule);
+
+/// Deserialize an RWR schedule from the given buffer of size `len` bytes
+rwr_schedule_t* rwr_schedule_read(void *buf, size_t len);
+
+/// Get the size in bytes that a buffer must be in order to serialize this schedule
+size_t rwr_schedule_serialized_len(rwr_schedule_t *schedule);
+
+/// Serialize the given schedule to `buf`, which must be at least `rwr_schedule_serialized_len` bytes
+void rwr_schedule_serialize(rwr_schedule_t *schedule, void *buf);
