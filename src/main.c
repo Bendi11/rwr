@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
     
     alr56_t *rwr = alr56_new(player);
     rwr->twa.dim = 0.9f;
+    rwr->twa.search = false;
     rwr_schedule_t *schedule = rwr_schedule_new();
 
     SDL_Window *window = NULL;
@@ -58,40 +59,42 @@ int main(int argc, char *argv[]) {
     bool run = true;
 
     for(uint8_t i = 0; i < 17; ++i) {
+        rwr_encounter_builder_t *ec = rwr_schedule_encounter(
+            schedule,
+            rwr_encounter_rand((rand_range_t){0, 5.f}),
+            rwr_encounter_rand_location(
+                (rand_location_t){
+                    .altitude = {500.f, 20000.f},
+                    .bearing = {-M_PI, M_PI},
+                    .distance = {1.f, 40.f}
+                }
+            ),
+            SOURCE_F16
+        );
 
-    rwr_encounter_builder_t *ec = rwr_schedule_encounter(
-        schedule,
-        0.f,
-        rwr_encounter_rand_location(
+        rwr_encounter_paint_periodic(
+            ec,
+            (rand_range_t){
+                .min = 0.5f,
+                .max = 3.f
+            },
             (rand_location_t){
-                .altitude = {500.f, 20000.f},
-                .bearing = {-M_PI, M_PI},
-                .distance = {1.f, 40.f}
-            }
-        ),
-        SOURCE_F16
-    );
+                .altitude = {-20.f, 20.f},
+                .bearing = {-0.1f, .1f},
+                .distance = {-0.2f, 0.2f}
+            },
+            i == 16 ? 60.f * 5.f : 60.f * 10.f
+        );
 
-    rwr_encounter_paint_periodic(
-        ec,
-        (rand_range_t){
-            .min = 5.f,
-            .max = 6.f
-        },
-        (rand_location_t){
-            .altitude = {-20.f, 20.f},
-            .bearing = {-0.1f, .1f},
-            .distance = {-0.2f, 0.2f}
-        },
-        i == 16 ? 30.f : 15.f
-    );
-    
-    rwr_encounter_delay(ec, 5.4f);
-    rwr_encounter_missile(ec);
+        rwr_encounter_delay(ec, rwr_encounter_rand((rand_range_t){1.5f, 7.3f}));
+        rwr_encounter_lock(ec);
+        
+        rwr_encounter_delay(ec, 5.4f);
+        rwr_scheduled_missile_t msl = rwr_encounter_missile(ec);
 
-    rwr_encounter_complete(ec);
-
+        rwr_encounter_complete(ec);
     }
+
 
     rwr_schedule_run(schedule, rwr);
     while(run && rwr_schedule_running(schedule)) {

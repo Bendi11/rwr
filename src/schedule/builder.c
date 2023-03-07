@@ -57,6 +57,63 @@ void rwr_encounter_paint_periodic(rwr_encounter_builder_t *builder, rand_range_t
     builder->t_offset = t;
 }
 
+void rwr_encounter_ping_missile(rwr_encounter_builder_t *builder, rwr_scheduled_missile_t missile, location_t loc) {
+    rwr_schedule_add_event(
+        builder->schedule,
+        (rwr_schedule_event_t) {
+            .tag = RWR_SCHEDULE_EVENT_MISSILE_PING,
+            .contact = builder->contact,
+            .time_ms = builder->t_offset,
+            .missile_ping = {
+                .loc = loc,
+                .missile = missile
+            }
+        }
+    );
+}
+
+void rwr_encounter_drop_missile(rwr_encounter_builder_t *builder, rwr_scheduled_missile_t missile) {
+    rwr_schedule_add_event(
+        builder->schedule,
+        (rwr_schedule_event_t) {
+            .tag = RWR_SCHEDULE_EVENT_DROP_MISSILE,
+            .contact = builder->contact,
+            .time_ms = builder->t_offset,
+            .missile_ping = {
+                .missile = missile
+            }
+        }
+    );
+}
+
+void rwr_encounter_lock(rwr_encounter_builder_t *builder) {
+    rwr_schedule_add_event(
+        builder->schedule,
+        (rwr_schedule_event_t) {
+            .tag = RWR_SCHEDULE_EVENT_LOCK,
+            .contact = builder->contact,
+            .time_ms = builder->t_offset,
+            .lock = {
+                
+            }
+        }
+    );
+}
+
+void rwr_encounter_drop_lock(rwr_encounter_builder_t *builder) {
+    rwr_schedule_add_event(
+        builder->schedule,
+        (rwr_schedule_event_t) {
+            .tag = RWR_SCHEDULE_EVENT_DROP_LOCK,
+            .contact = builder->contact,
+            .time_ms = builder->t_offset,
+            .drop_lock = {
+                
+            }
+        }
+    );
+}
+
 float rwr_encounter_rand(rand_range_t range) {
     float r = (float)rand() / (float)RAND_MAX;
     r = (r * (range.max - range.min) + range.min);

@@ -32,6 +32,12 @@ void rwr_encounter_paint(rwr_encounter_builder_t *builder, location_t diff);
 /// For the next `time` seconds, send a radar ping at the current location every `ping_interval` seconds
 void rwr_encounter_paint_periodic(rwr_encounter_builder_t *builder, rand_range_t ping_interval, rand_location_t movement, float time);
 
+/// Aquire a STT lock on the RWR
+void rwr_encounter_lock(rwr_encounter_builder_t *builder);
+
+/// Drop a radar lock if it was aquired
+void rwr_encounter_drop_lock(rwr_encounter_builder_t *builder);
+
 /// Generate a random location using the given parameters
 location_t rwr_encounter_rand_location(rand_location_t loc);
 
