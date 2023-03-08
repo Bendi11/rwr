@@ -74,7 +74,7 @@ void rwr_schedule_stop(rwr_schedule_t *schedule);
 void rwr_schedule_free(rwr_schedule_t *schedule);
 
 /// Deserialize an RWR schedule from the given buffer of size `len` bytes
-rwr_schedule_t* rwr_schedule_read(void *buf, size_t len);
+rwr_schedule_t* rwr_schedule_deserialize(void *buf, size_t len);
 
 /// Get the size in bytes that a buffer must be in order to serialize this schedule
 size_t rwr_schedule_serialized_len(rwr_schedule_t *schedule);

@@ -13,6 +13,7 @@
 #include <SDL_ttf.h>
 #include <SDL_video.h>
 #include <math.h>
+#include <stdio.h>
 #include <time.h>
 
 void test_cb(void *userdat, uint8_t *buf, int len) {
@@ -94,6 +95,21 @@ int main(int argc, char *argv[]) {
 
         rwr_encounter_complete(ec);
     }
+
+    size_t len = rwr_schedule_serialized_len(schedule);
+    uint8_t *buf = malloc(len);
+    rwr_schedule_serialize(schedule, buf);
+
+    schedule = rwr_schedule_deserialize(buf, len);
+
+    FILE *f = fopen("./test.rwr", "w");
+    size_t written = 0;
+    while(written != len) {
+        written += fwrite(buf + written, sizeof(*buf), len - written, f);
+    }
+    
+    free(buf);
+    fclose(f);
 
 
     rwr_schedule_run(schedule, rwr);

@@ -28,7 +28,7 @@ size_t rwr_schedule_serialized_len(rwr_schedule_t *schedule) {
         sizeof(schedule->events.len);
 }
 
-static void write_location(uint8_t *buf, location_t loc) {
+static uint8_t* write_location(uint8_t *buf, location_t loc) {
     uint32_t le_32;
     #define WRITE_FLOAT(v) do {                                  \
             memcpy(&le_32, &(v), sizeof(v)); \
@@ -40,6 +40,28 @@ static void write_location(uint8_t *buf, location_t loc) {
     WRITE_FLOAT(loc.altitude);
     WRITE_FLOAT(loc.bearing);
     WRITE_FLOAT(loc.distance);
+
+    #undef WRITE_FLOAT
+
+    return buf;
+}
+
+static uint8_t* read_location(uint8_t *buf, location_t *loc) {
+    uint32_t le_32;
+    #define READ_FLOAT(v) do {                                  \
+            memcpy(&le_32, buf, sizeof(le_32));                 \
+            le_32 = le32(le_32);                                \
+            memcpy(&(v), &le_32, sizeof(le_32));                \
+            buf += sizeof(le_32);                               \
+        } while(0)
+
+    READ_FLOAT(loc->altitude);
+    READ_FLOAT(loc->bearing);
+    READ_FLOAT(loc->distance);
+
+    #undef READ_FLOAT
+
+    return buf;
 }
 
 void rwr_schedule_serialize(rwr_schedule_t *schedule, void *vbuf) {
@@ -62,14 +84,112 @@ void rwr_schedule_serialize(rwr_schedule_t *schedule, void *vbuf) {
 
         uint8_t *finish = buf + RWR_SCHEDULE_EVENT_UNION_SIZE;
 
-        switch(schedule->events.array[i].tag) {
+        switch(ev->tag) {
             case RWR_SCHEDULE_EVENT_NEWGUY: {
-                write_location(buf, ev->newguy.loc);
+                buf = write_location(buf, ev->newguy.loc);
                 le_16 = le16(ev->newguy.source);
                 WRITE(le_16);
+            } break;
+
+            case RWR_SCHEDULE_EVENT_PAINT: {
+                buf = write_location(buf, ev->paint.loc_diff);
+            } break;
+
+            case RWR_SCHEDULE_EVENT_FIRE_MISSILE: {
+                le_16 = le16(ev->fire_missile.missile);
+                WRITE(le_16);
+            } break;
+
+            case RWR_SCHEDULE_EVENT_DROP_MISSILE: {
+                le_16 = le16(ev->drop_missile.missile);
+                WRITE(le_16);
+            } break;
+
+            case RWR_SCHEDULE_EVENT_MISSILE_PING: {
+                le_16 = le16(ev->missile_ping.missile);
+                WRITE(le_16);
+                buf = write_location(buf, ev->missile_ping.loc);
             } break;
         }
 
         buf = finish;
     }
+
+    #undef WRITE
+}
+
+rwr_schedule_t* rwr_schedule_deserialize(void *vbuf, size_t len) {
+    #define READ(v) do { memcpy(&(v), buf, sizeof(v)); buf += sizeof(v); } while(0)
+    rwr_schedule_t *schedule = malloc(sizeof(*schedule));
+    schedule->run.rwr = NULL;
+
+    uint8_t *buf = (uint8_t*)vbuf;
+    uint16_t le_16;
+    READ(le_16);
+    le_16 = le16(le_16);
+    schedule->missiles = le_16;
+
+    READ(le_16);
+    le_16 = le16(le_16);
+    schedule->contacts = le_16;
+
+    uint32_t le_32;
+    READ(le_32);
+    le_32 = le32(le_32);
+    schedule->events.len = le_32;
+    schedule->events.cap = le_32;
+    schedule->events.array = calloc(schedule->events.cap, sizeof(*schedule->events.array));
+
+    for(uint32_t i = 0; i < schedule->events.len; ++i) {
+        rwr_schedule_event_t *ev = &schedule->events.array[i];
+        READ(le_16);
+        le_16 = le16(le_16);
+        ev->contact = le_16;
+
+        READ(ev->tag);
+
+        READ(le_32);
+        le_32 = le32(le_32);
+        ev->time_ms = le_32;
+
+        uint8_t *finish = buf + RWR_SCHEDULE_EVENT_UNION_SIZE;
+
+        switch(ev->tag) {
+            case RWR_SCHEDULE_EVENT_NEWGUY: {
+                buf = read_location(buf, &ev->newguy.loc);
+                READ(le_16);
+                le_16 = le16(le_16);
+                ev->newguy.source = le_16;
+            } break;
+
+            case RWR_SCHEDULE_EVENT_PAINT: {
+                buf = read_location(buf, &ev->paint.loc_diff);
+            } break;
+
+            case RWR_SCHEDULE_EVENT_FIRE_MISSILE: {
+                READ(le_16);
+                le_16 = le16(le_16);
+                ev->fire_missile.missile = le_16;
+            } break;
+
+            case RWR_SCHEDULE_EVENT_DROP_MISSILE: {
+                READ(le_16);
+                le_16 = le16(le_16);
+                ev->drop_missile.missile = le_16;
+            } break;
+
+            case RWR_SCHEDULE_EVENT_MISSILE_PING: {
+                READ(le_16);
+                le_16 = le16(le_16);
+                ev->missile_ping.missile = le_16;
+                buf = read_location(buf, &ev->missile_ping.loc);
+            } break;
+        }
+
+        buf = finish;
+    }
+
+    #undef READ
+    return schedule;
+
 }
